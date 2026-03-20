@@ -62,7 +62,7 @@ export default function Home() {
   useEffect(() => { fetchSlots(); }, [fetchSlots]);
 
   useEffect(() => {
-    const interval = setInterval(fetchSlots, 30000);
+    const interval = setInterval(fetchSlots, 3000); // Polling every 3s for real-time updates
     const handleFocus = () => fetchSlots();
     window.addEventListener('focus', handleFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', handleFocus); };
