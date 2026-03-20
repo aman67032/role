@@ -62,7 +62,9 @@ export default function Home() {
   useEffect(() => { fetchSlots(); }, [fetchSlots]);
 
   useEffect(() => {
-    const interval = setInterval(fetchSlots, 3000); // Polling every 3s for real-time updates
+    // 15 seconds polling prevents server overload while keeping data relatively fresh
+    const interval = setInterval(fetchSlots, 15000); 
+    // Instantly refresh when the user switches back to this tab
     const handleFocus = () => fetchSlots();
     window.addEventListener('focus', handleFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', handleFocus); };
