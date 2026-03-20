@@ -115,11 +115,7 @@ export default function Home() {
     <div style={{ minHeight: '100vh', padding: '16px', maxWidth: '900px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '28px', paddingTop: '16px' }}>
-        <div className="animate-wiggle" style={{ display: 'inline-block', marginBottom: '10px' }}>
-          <div className="starburst" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
-            <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '10px', color: '#222', fontWeight: 'bold' }}>BOOK!</span>
-          </div>
-        </div>
+        
 
         <h1 style={{
           fontFamily: 'var(--font-comic)',
