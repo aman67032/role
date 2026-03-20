@@ -12,21 +12,11 @@ const DATES = [
 ];
 
 const SLOT_LABELS: Record<string, string> = {
-  '09:30': '9:30 AM',
-  '10:00': '10:00 AM',
-  '10:30': '10:30 AM',
-  '11:00': '11:00 AM',
-  '11:30': '11:30 AM',
-  '12:00': '12:00 PM',
-  '12:30': '12:30 PM',
-  '13:00': '1:00 PM',
-  '13:30': '1:30 PM',
-  '14:00': '2:00 PM',
-  '14:30': '2:30 PM',
-  '15:00': '3:00 PM',
-  '15:30': '3:30 PM',
-  '16:00': '4:00 PM',
-  '16:30': '4:30 PM',
+  '09:30': '9:30 AM', '10:00': '10:00 AM', '10:30': '10:30 AM',
+  '11:00': '11:00 AM', '11:30': '11:30 AM', '12:00': '12:00 PM',
+  '12:30': '12:30 PM', '13:00': '1:00 PM', '13:30': '1:30 PM',
+  '14:00': '2:00 PM', '14:30': '2:30 PM', '15:00': '3:00 PM',
+  '15:30': '3:30 PM', '16:00': '4:00 PM', '16:30': '4:30 PM',
 };
 
 const SLOT_COLORS = [
@@ -53,11 +43,7 @@ export default function Home() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    phone: '',
-    jkluId: '',
-    rollNumber: '',
-    formNumber: '',
+    name: '', phone: '', jkluId: '', rollNumber: '', formNumber: '',
   });
 
   const fetchSlots = useCallback(async () => {
@@ -73,19 +59,13 @@ export default function Home() {
     }
   }, [selectedDate]);
 
-  useEffect(() => {
-    fetchSlots();
-  }, [fetchSlots]);
+  useEffect(() => { fetchSlots(); }, [fetchSlots]);
 
-  // Poll every 30s + on tab focus
   useEffect(() => {
     const interval = setInterval(fetchSlots, 30000);
     const handleFocus = () => fetchSlots();
     window.addEventListener('focus', handleFocus);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('focus', handleFocus);
-    };
+    return () => { clearInterval(interval); window.removeEventListener('focus', handleFocus); };
   }, [fetchSlots]);
 
   const handleSlotClick = (slot: string) => {
@@ -99,45 +79,28 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSlot) return;
-
-    // Validation
     if (!formData.name || !formData.phone || !formData.jkluId || !formData.rollNumber || !formData.formNumber) {
       setError('All fields are required!');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
       const res = await fetch(`${API_URL}/api/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: selectedDate,
-          timeSlot: selectedSlot,
-          ...formData,
-        }),
+        body: JSON.stringify({ date: selectedDate, timeSlot: selectedSlot, ...formData }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.error || 'Booking failed!');
-        // Refresh slots in case someone else booked
         fetchSlots();
         return;
       }
-
       setSuccess(true);
       setBookedSlots(prev => [...prev, selectedSlot]);
       setFormData({ name: '', phone: '', jkluId: '', rollNumber: '', formNumber: '' });
-
-      setTimeout(() => {
-        setShowModal(false);
-        setSelectedSlot(null);
-        setSuccess(false);
-      }, 2500);
+      setTimeout(() => { setShowModal(false); setSelectedSlot(null); setSuccess(false); }, 2500);
     } catch {
       setError('Network error! Try again.');
     } finally {
@@ -149,109 +112,76 @@ export default function Home() {
   const availableSlots = allSlots.filter(s => !bookedSlots.includes(s));
 
   return (
-    <div className="min-h-screen" style={{ padding: '20px' }}>
+    <div style={{ minHeight: '100vh', padding: '16px', maxWidth: '900px', margin: '0 auto' }}>
       {/* Header */}
-      <div className="text-center" style={{ marginBottom: '32px', paddingTop: '20px' }}>
-        {/* Comic ZAP effect */}
-        <div className="animate-wiggle inline-block" style={{ marginBottom: '12px' }}>
-          <div
-            className="starburst"
-            style={{
-              width: '100px',
-              height: '100px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto',
-            }}
-          >
-            <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem', color: '#222', fontWeight: 'bold' }}>
-              BOOK!
-            </span>
+      <div style={{ textAlign: 'center', marginBottom: '28px', paddingTop: '16px' }}>
+        <div className="animate-wiggle" style={{ display: 'inline-block', marginBottom: '10px' }}>
+          <div className="starburst" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+            <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '10px', color: '#222', fontWeight: 'bold' }}>BOOK!</span>
           </div>
         </div>
 
-        <h1
-          style={{
-            fontFamily: 'var(--font-comic)',
-            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-            color: 'var(--text-primary)',
-            letterSpacing: '2px',
-            textShadow: '3px 3px 0 var(--accent-yellow), 5px 5px 0 var(--accent-pink)',
-            lineHeight: 1.2,
-          }}
-        >
+        <h1 style={{
+          fontFamily: 'var(--font-comic)',
+          fontSize: 'clamp(1.8rem, 6vw, 3.5rem)',
+          color: 'var(--text-primary)',
+          letterSpacing: '2px',
+          textShadow: '3px 3px 0 var(--accent-yellow), 5px 5px 0 var(--accent-pink)',
+          lineHeight: 1.2,
+        }}>
           ⚡ SLOT BOOKING ⚡
         </h1>
-        <div className="speech-bubble inline-block" style={{ marginTop: '16px' }}>
-          <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.55rem', lineHeight: '1.8' }}>
-            Pick your date & time slot!
+
+        <div className="speech-bubble" style={{ display: 'inline-block', marginTop: '14px' }}>
+          <p style={{ fontFamily: 'var(--font-comic)', fontSize: '16px', lineHeight: '1.4', letterSpacing: '0.5px' }}>
+            Pick your date &amp; time slot!
           </p>
         </div>
       </div>
 
       {/* Date Tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '12px',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          marginBottom: '32px',
-        }}
-      >
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
         {DATES.map((d) => (
           <button
             key={d.value}
             className={`date-tab ${selectedDate === d.value ? 'active' : ''}`}
-            onClick={() => {
-              setSelectedDate(d.value);
-              setSelectedSlot(null);
-            }}
+            onClick={() => { setSelectedDate(d.value); setSelectedSlot(null); }}
           >
-            <div>{d.day}</div>
-            <div style={{ marginTop: '4px' }}>{d.label}</div>
+            <div style={{ fontWeight: 'bold' }}>{d.day}</div>
+            <div style={{ marginTop: '2px' }}>{d.label}</div>
           </button>
         ))}
       </div>
 
       {/* Stats */}
-      <div className="text-center" style={{ marginBottom: '24px' }}>
-        <div
-          className="pixel-border-sm inline-block"
-          style={{
-            background: 'var(--accent-blue)',
-            padding: '8px 20px',
-            fontFamily: 'var(--font-pixel)',
-            fontSize: '0.55rem',
-            color: '#fff',
-          }}
-        >
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <div className="pixel-border-sm" style={{
+          display: 'inline-block',
+          background: 'var(--accent-blue)',
+          padding: '10px 22px',
+          fontFamily: 'var(--font-pixel)',
+          fontSize: '11px',
+          color: '#fff',
+          lineHeight: '1.5',
+        }}>
           {fetching ? '⏳ LOADING...' : `🎮 ${availableSlots.length} / ${allSlots.length} SLOTS FREE`}
         </div>
       </div>
 
       {/* Slot Grid */}
-      <div
-        className="halftone"
-        style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          padding: '24px',
-          background: 'var(--bg-secondary)',
-          border: '4px solid var(--border-color)',
-          boxShadow: '6px 6px 0 var(--shadow-color)',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-            gap: '12px',
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
+      <div className="halftone" style={{
+        padding: '20px',
+        background: 'var(--bg-secondary)',
+        border: '4px solid var(--border-color)',
+        boxShadow: '6px 6px 0 var(--shadow-color)',
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+          gap: '10px',
+          position: 'relative',
+          zIndex: 1,
+        }}>
           {allSlots.map((slot, i) => {
             const isBooked = bookedSlots.includes(slot);
             const isSelected = selectedSlot === slot;
@@ -260,29 +190,27 @@ export default function Home() {
                 key={slot}
                 className={`slot-card ${isBooked ? 'booked' : ''} ${isSelected ? 'selected' : ''} animate-pop`}
                 style={{
-                  animationDelay: `${i * 0.04}s`,
+                  animationDelay: `${i * 0.03}s`,
                   borderTop: isBooked ? undefined : `5px solid ${SLOT_COLORS[i % SLOT_COLORS.length]}`,
                 }}
                 onClick={() => !isBooked && handleSlotClick(slot)}
               >
-                <div
-                  style={{
-                    fontFamily: 'var(--font-pixel)',
-                    fontSize: '0.55rem',
-                    marginBottom: '4px',
-                    opacity: isBooked ? 0.3 : 1,
-                  }}
-                >
+                <div style={{
+                  fontFamily: 'var(--font-pixel)',
+                  fontSize: '11px',
+                  marginBottom: '6px',
+                  opacity: isBooked ? 0.3 : 1,
+                  lineHeight: '1.4',
+                }}>
                   {SLOT_LABELS[slot]}
                 </div>
-                <div
-                  style={{
-                    fontFamily: 'var(--font-comic)',
-                    fontSize: '0.85rem',
-                    color: isBooked ? '#999' : 'var(--accent-pink)',
-                    fontWeight: 'bold',
-                  }}
-                >
+                <div style={{
+                  fontFamily: 'var(--font-comic)',
+                  fontSize: '16px',
+                  color: isBooked ? '#999' : 'var(--accent-pink)',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.5px',
+                }}>
                   {isBooked ? 'BOOKED' : 'OPEN ✨'}
                 </div>
               </div>
@@ -292,207 +220,103 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <div
-        className="text-center"
-        style={{
-          marginTop: '32px',
-          paddingBottom: '20px',
-          fontFamily: 'var(--font-pixel)',
-          fontSize: '0.5rem',
-          color: 'var(--text-secondary)',
-        }}
-      >
-        ★ March 23 - 26, 2026 ★ 9:30 AM to 5:00 PM ★
+      <div style={{
+        textAlign: 'center',
+        marginTop: '28px',
+        paddingBottom: '20px',
+        fontFamily: 'var(--font-comic)',
+        fontSize: '14px',
+        color: 'var(--text-secondary)',
+        letterSpacing: '0.5px',
+      }}>
+        ★ March 23 – 26, 2026 ★ 9:30 AM to 5:00 PM ★
       </div>
 
-      {/* Booking Modal */}
+      {/* ========== BOOKING MODAL ========== */}
       {showModal && (
         <div className="modal-overlay" onClick={() => !loading && setShowModal(false)}>
-          <div
-            className="modal-content animate-pop"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-content animate-pop" onClick={(e) => e.stopPropagation()}>
             {success ? (
-              <div className="text-center success-pop" style={{ padding: '20px' }}>
-                <div
-                  className="starburst"
-                  style={{
-                    width: '120px',
-                    height: '120px',
-                    margin: '0 auto 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.6rem' }}>YAY!</span>
+              <div style={{ textAlign: 'center', padding: '16px' }} className="success-pop">
+                <div className="starburst" style={{ width: '100px', height: '100px', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: 'var(--font-pixel)', fontSize: '10px' }}>YAY!</span>
                 </div>
-                <h2
-                  style={{
-                    fontFamily: 'var(--font-comic)',
-                    fontSize: '2rem',
-                    color: 'var(--accent-green)',
-                    textShadow: '2px 2px 0 #222',
-                  }}
-                >
+                <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '2rem', color: '#2E7D32', textShadow: '2px 2px 0 #222' }}>
                   BOOKED! ✅
                 </h2>
-                <p style={{ fontFamily: 'var(--font-pixel)', fontSize: '0.5rem', marginTop: '12px', color: '#555' }}>
+                <p style={{ fontFamily: 'var(--font-comic)', fontSize: '15px', marginTop: '10px', color: '#555' }}>
                   {SLOT_LABELS[selectedSlot!]} on {selectedDate}
                 </p>
               </div>
             ) : (
               <>
-                {/* Modal Header */}
-                <div style={{ marginBottom: '20px' }}>
-                  <div
-                    className="pixel-border-sm inline-block"
-                    style={{
-                      background: 'var(--accent-pink)',
-                      padding: '6px 14px',
-                      fontFamily: 'var(--font-pixel)',
-                      fontSize: '0.5rem',
-                      color: '#fff',
-                      marginBottom: '12px',
-                    }}
-                  >
+                <div style={{ marginBottom: '18px' }}>
+                  <div className="pixel-border-sm" style={{
+                    display: 'inline-block',
+                    background: 'var(--accent-pink)',
+                    padding: '8px 16px',
+                    fontFamily: 'var(--font-pixel)',
+                    fontSize: '10px',
+                    color: '#fff',
+                    marginBottom: '10px',
+                    lineHeight: '1.5',
+                  }}>
                     {selectedSlot && SLOT_LABELS[selectedSlot]} • {selectedDate}
                   </div>
-                  <h2
-                    style={{
-                      fontFamily: 'var(--font-comic)',
-                      fontSize: '1.8rem',
-                      letterSpacing: '1px',
-                    }}
-                  >
+                  <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '1.6rem', letterSpacing: '1px' }}>
                     📝 BOOK THIS SLOT!
                   </h2>
                 </div>
 
                 {error && (
-                  <div
-                    className="pixel-border-sm"
-                    style={{
-                      background: '#FFCDD2',
-                      padding: '10px 14px',
-                      marginBottom: '16px',
-                      fontFamily: 'var(--font-pixel)',
-                      fontSize: '0.5rem',
-                      color: '#B71C1C',
-                    }}
-                  >
+                  <div className="pixel-border-sm" style={{
+                    background: '#FFCDD2',
+                    padding: '10px 14px',
+                    marginBottom: '14px',
+                    fontFamily: 'var(--font-comic)',
+                    fontSize: '14px',
+                    color: '#B71C1C',
+                  }}>
                     💥 {error}
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div>
-                      <label
-                        style={{
-                          fontFamily: 'var(--font-pixel)',
-                          fontSize: '0.5rem',
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {[
+                      { key: 'name', label: 'NAME', placeholder: 'Your Name', type: 'text' },
+                      { key: 'phone', label: 'PHONE NUMBER', placeholder: 'Phone Number', type: 'tel' },
+                      { key: 'jkluId', label: 'JKLU ID', placeholder: 'JKLU ID', type: 'text' },
+                      { key: 'rollNumber', label: 'ROLL NUMBER', placeholder: 'Roll Number', type: 'text' },
+                      { key: 'formNumber', label: 'FORM NUMBER', placeholder: 'Form Number', type: 'text' },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <label style={{
+                          fontFamily: 'var(--font-comic)',
+                          fontSize: '14px',
+                          fontWeight: 'bold',
                           display: 'block',
                           marginBottom: '4px',
-                        }}
-                      >
-                        NAME
-                      </label>
-                      <input
-                        className="comic-input"
-                        type="text"
-                        placeholder="Your Name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        style={{
-                          fontFamily: 'var(--font-pixel)',
-                          fontSize: '0.5rem',
-                          display: 'block',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        PHONE NUMBER
-                      </label>
-                      <input
-                        className="comic-input"
-                        type="tel"
-                        placeholder="Phone Number"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        style={{
-                          fontFamily: 'var(--font-pixel)',
-                          fontSize: '0.5rem',
-                          display: 'block',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        JKLU ID
-                      </label>
-                      <input
-                        className="comic-input"
-                        type="text"
-                        placeholder="JKLU ID"
-                        value={formData.jkluId}
-                        onChange={(e) => setFormData({ ...formData, jkluId: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        style={{
-                          fontFamily: 'var(--font-pixel)',
-                          fontSize: '0.5rem',
-                          display: 'block',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        ROLL NUMBER
-                      </label>
-                      <input
-                        className="comic-input"
-                        type="text"
-                        placeholder="Roll Number"
-                        value={formData.rollNumber}
-                        onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        style={{
-                          fontFamily: 'var(--font-pixel)',
-                          fontSize: '0.5rem',
-                          display: 'block',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        FORM NUMBER
-                      </label>
-                      <input
-                        className="comic-input"
-                        type="text"
-                        placeholder="Form Number"
-                        value={formData.formNumber}
-                        onChange={(e) => setFormData({ ...formData, formNumber: e.target.value })}
-                      />
-                    </div>
+                          letterSpacing: '1px',
+                        }}>
+                          {field.label}
+                        </label>
+                        <input
+                          className="comic-input"
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          value={formData[field.key as keyof FormData]}
+                          onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                        />
+                      </div>
+                    ))}
                   </div>
 
                   <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                     <button
                       type="button"
                       className="comic-btn"
-                      style={{
-                        background: '#eee',
-                        flex: 1,
-                        fontSize: '1rem',
-                      }}
+                      style={{ background: '#eee', flex: 1 }}
                       onClick={() => setShowModal(false)}
                       disabled={loading}
                     >
@@ -501,14 +325,10 @@ export default function Home() {
                     <button
                       type="submit"
                       className="comic-btn"
-                      style={{
-                        background: 'var(--accent-green)',
-                        flex: 1,
-                        fontSize: '1rem',
-                      }}
+                      style={{ background: 'var(--accent-green)', flex: 1 }}
                       disabled={loading}
                     >
-                      {loading ? '⏳ BOOKING...' : '⚡ BOOK IT!'}
+                      {loading ? '⏳ ...' : '⚡ BOOK IT!'}
                     </button>
                   </div>
                 </form>
