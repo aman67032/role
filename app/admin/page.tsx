@@ -86,57 +86,53 @@ export default function AdminPage() {
     }
   };
 
-  // Group bookings by date for cleaner UI
+  // Group bookings by date
   const groupedBookings = bookings.reduce((acc, booking) => {
     if (!acc[booking.date]) acc[booking.date] = [];
     acc[booking.date].push(booking);
     return acc;
   }, {} as Record<string, Booking[]>);
 
-  // Login View
+  // ---------- LOGIN VIEW ----------
   if (!isLoggedIn) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-        <div className="modal-content animate-pop" style={{ maxWidth: '400px', width: '100%' }}>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '2rem', letterSpacing: '1px' }}>
-              🕵️ ADMIN LOGIN
-            </h2>
-          </div>
+      <div style={{ fontFamily: '"Times New Roman", Times, serif', minHeight: '100vh', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ backgroundColor: 'white', padding: '50px 40px', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', maxWidth: '500px', width: '100%', border: '1px solid #e5e7eb' }}>
+          <h2 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '40px', textAlign: 'center', color: '#111827', margin: '0 0 30px 0' }}>Administration</h2>
           
           {loginError && (
-            <div className="pixel-border-sm" style={{ background: '#FFCDD2', padding: '10px', marginBottom: '16px', fontFamily: 'var(--font-comic)', color: '#B71C1C' }}>
-              💥 {loginError}
+            <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '16px', borderRadius: '6px', marginBottom: '24px', fontSize: '1.25rem', border: '1px solid #f87171' }}>
+              {loginError}
             </div>
           )}
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <div>
-              <label style={{ fontFamily: 'var(--font-comic)', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
-                USERNAME
-              </label>
+              <label style={{ display: 'block', fontSize: '1.35rem', fontWeight: 'bold', marginBottom: '12px', color: '#374151' }}>Username</label>
               <input
                 type="text"
-                className="comic-input"
-                placeholder="Admin ID"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
+                style={{ width: '100%', padding: '16px', fontSize: '1.5rem', border: '2px solid #d1d5db', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'inherit' }}
+                placeholder="Enter your ID"
               />
             </div>
             <div>
-              <label style={{ fontFamily: 'var(--font-comic)', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
-                PASSWORD
-              </label>
+              <label style={{ display: 'block', fontSize: '1.35rem', fontWeight: 'bold', marginBottom: '12px', color: '#374151' }}>Password</label>
               <input
                 type="password"
-                className="comic-input"
-                placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
+                style={{ width: '100%', padding: '16px', fontSize: '1.5rem', border: '2px solid #d1d5db', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'inherit' }}
+                placeholder="Enter your password"
               />
             </div>
-            <button type="submit" className="comic-btn" disabled={loading} style={{ background: 'var(--accent-green)', marginTop: '8px' }}>
-              {loading ? '⏳ ...' : 'ENTER'}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ backgroundColor: '#111827', color: 'white', padding: '20px', fontSize: '1.75rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer', marginTop: '20px', fontFamily: 'inherit', transition: 'opacity 0.2s' }}
+            >
+              {loading ? 'Authenticating...' : 'Secure Login'}
             </button>
           </form>
         </div>
@@ -144,70 +140,97 @@ export default function AdminPage() {
     );
   }
 
-  // Dashboard View
+  // ---------- DASHBOARD VIEW (TIMELINE) ----------
   return (
-    <div style={{ minHeight: '100vh', padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-        <h1 style={{
-          fontFamily: 'var(--font-comic)',
-          fontSize: 'clamp(2rem, 5vw, 3rem)',
-          color: 'var(--text-primary)',
-          letterSpacing: '2px',
-          textShadow: '3px 3px 0 var(--accent-yellow)',
-        }}>
-          🛡️ ADMIN DASHBOARD
-        </h1>
-        <button className="comic-btn" onClick={handleLogout} style={{ padding: '8px 16px', fontSize: '14px', background: 'var(--accent-pink)' }}>
-          LOGOUT
-        </button>
-      </div>
+    <div style={{ fontFamily: '"Times New Roman", Times, serif', minHeight: '100vh', backgroundColor: '#f9fafb', padding: '60px 20px', color: '#111827' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #e5e7eb', paddingBottom: '30px', marginBottom: '50px', flexWrap: 'wrap', gap: '20px' }}>
+          <div>
+            <h1 style={{ fontSize: '3.5rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#111827' }}>Booking Administration</h1>
+            <p style={{ fontSize: '1.5rem', color: '#6b7280', margin: 0 }}>Review all scheduled slots in chronological order.</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '16px 32px', fontSize: '1.5rem', fontWeight: 'bold', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.2)' }}
+          >
+            Logout
+          </button>
+        </div>
 
-      {fetchError ? (
-        <div className="pixel-border-sm" style={{ background: '#FFCDD2', padding: '16px', fontFamily: 'var(--font-comic)' }}>
-          {fetchError}
-        </div>
-      ) : bookings.length === 0 ? (
-        <div className="halftone" style={{ padding: '32px', textAlign: 'center', background: 'var(--bg-card)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)' }}>
-          <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '1.5rem', color: '#666' }}>No bookings found.</h2>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        {fetchError && (
+          <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '24px', fontSize: '1.75rem', borderRadius: '8px', marginBottom: '40px', border: '1px solid #f87171' }}>
+            {fetchError}
+          </div>
+        )}
+        
+        {bookings.length === 0 && !fetchError && (
+          <div style={{ textAlign: 'center', padding: '80px 20px', fontSize: '2.5rem', color: '#6b7280', border: '3px dashed #d1d5db', borderRadius: '16px', backgroundColor: '#f3f4f6' }}>
+            No bookings have been made yet.
+          </div>
+        )}
+
+        {/* Timeline */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '80px' }}>
           {Object.keys(groupedBookings).sort().map(date => (
-            <div key={date} className="pixel-border" style={{ background: 'var(--bg-secondary)', padding: '20px' }}>
-              <div style={{ display: 'inline-block', background: 'var(--accent-blue)', color: 'white', padding: '8px 16px', fontFamily: 'var(--font-pixel)', fontSize: '12px', marginBottom: '16px', border: '3px solid var(--border-color)', boxShadow: '3px 3px 0 var(--shadow-color)' }}>
-                📅 {date}
+            <div key={date}>
+              <div style={{ display: 'inline-block', backgroundColor: '#111827', color: 'white', padding: '16px 32px', borderRadius: '50px', marginBottom: '40px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0 }}>Date: {date}</h2>
               </div>
               
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'var(--font-comic)', background: 'white', border: '3px solid var(--border-color)' }}>
-                  <thead style={{ background: 'var(--accent-yellow)' }}>
-                    <tr>
-                      <th style={{ padding: '12px', borderBottom: '3px solid var(--border-color)', borderRight: '2px solid #ccc', textAlign: 'left' }}>Time Slot</th>
-                      <th style={{ padding: '12px', borderBottom: '3px solid var(--border-color)', borderRight: '2px solid #ccc', textAlign: 'left' }}>Name</th>
-                      <th style={{ padding: '12px', borderBottom: '3px solid var(--border-color)', borderRight: '2px solid #ccc', textAlign: 'left' }}>Phone</th>
-                      <th style={{ padding: '12px', borderBottom: '3px solid var(--border-color)', borderRight: '2px solid #ccc', textAlign: 'left' }}>JKLU ID</th>
-                      <th style={{ padding: '12px', borderBottom: '3px solid var(--border-color)', borderRight: '2px solid #ccc', textAlign: 'left' }}>Roll No</th>
-                      <th style={{ padding: '12px', borderBottom: '3px solid var(--border-color)', textAlign: 'left' }}>Form No</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {groupedBookings[date].map((b, idx) => (
-                      <tr key={b._id} style={{ borderBottom: '2px solid #eee', background: idx % 2 === 0 ? '#fff' : '#fcfcfc' }}>
-                        <td style={{ padding: '12px', borderRight: '2px solid #eee', fontWeight: 'bold', color: 'var(--accent-pink)' }}>{b.timeSlot}</td>
-                        <td style={{ padding: '12px', borderRight: '2px solid #eee' }}>{b.name}</td>
-                        <td style={{ padding: '12px', borderRight: '2px solid #eee' }}>{b.phone}</td>
-                        <td style={{ padding: '12px', borderRight: '2px solid #eee' }}>{b.jkluId}</td>
-                        <td style={{ padding: '12px', borderRight: '2px solid #eee' }}>{b.rollNumber}</td>
-                        <td style={{ padding: '12px' }}>{b.formNumber}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div style={{ position: 'relative', borderLeft: '6px solid #d1d5db', marginLeft: '32px', paddingLeft: '40px' }}>
+                {groupedBookings[date].map((b) => (
+                  <div key={b._id} style={{ position: 'relative', marginBottom: '60px' }}>
+                    
+                    {/* Timeline Node */}
+                    <div style={{ position: 'absolute', width: '28px', height: '28px', backgroundColor: '#3b82f6', borderRadius: '50%', left: '-57px', top: '6px', border: '6px solid #f9fafb', boxShadow: '0 0 0 2px #d1d5db' }}></div>
+                    
+                    {/* Time Slot Header */}
+                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 20px 0', display: 'flex', alignItems: 'center' }}>
+                      <span style={{ display: 'inline-block', borderBottom: '3px solid #bfdbfe', paddingBottom: '4px' }}>{b.timeSlot}</span>
+                    </h3>
+                    
+                    {/* Details Card */}
+                    <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
+                        
+                        <div>
+                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Full Name</strong>
+                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.name}</div>
+                        </div>
+                        
+                        <div>
+                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Phone Number</strong>
+                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.phone}</div>
+                        </div>
+                        
+                        <div>
+                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>JKLU ID</strong>
+                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827', padding: '4px 12px', backgroundColor: '#f3f4f6', borderRadius: '4px', display: 'inline-block' }}>{b.jkluId}</div>
+                        </div>
+                        
+                        <div>
+                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Roll Number</strong>
+                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.rollNumber}</div>
+                        </div>
+                        
+                        <div>
+                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Form Number</strong>
+                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.formNumber}</div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                ))}
               </div>
             </div>
           ))}
         </div>
-      )}
+        
+      </div>
     </div>
   );
 }
