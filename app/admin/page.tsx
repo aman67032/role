@@ -25,8 +25,6 @@ export default function AdminPage() {
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
-  
-  // Date-wise pagination state
   const [selectedDate, setSelectedDate] = useState<string>('');
 
   useEffect(() => {
@@ -83,7 +81,6 @@ export default function AdminPage() {
       const data: Booking[] = await res.json();
       setBookings(data);
       
-      // Auto-select the earliest available date
       const uniqueDates = Array.from(new Set(data.map(b => b.date))).sort();
       if (uniqueDates.length > 0) {
         setSelectedDate(uniqueDates[0]);
@@ -95,12 +92,8 @@ export default function AdminPage() {
     }
   };
 
-  // Compute unique dates for pagination tabs
-  const uniqueDates = useMemo(() => {
-    return Array.from(new Set(bookings.map(b => b.date))).sort();
-  }, [bookings]);
+  const uniqueDates = useMemo(() => Array.from(new Set(bookings.map(b => b.date))).sort(), [bookings]);
 
-  // Filter bookings for the currently selected date tab
   const displayedBookings = useMemo(() => {
     return bookings
       .filter(b => b.date === selectedDate)
@@ -110,48 +103,51 @@ export default function AdminPage() {
   // ---------- LOGIN VIEW ----------
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-50 flex justify-center items-center p-4 selection:bg-indigo-100 font-sans">
-        <div className="w-full max-w-md bg-white p-8 sm:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-          <div className="text-center mb-10">
-            <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 mb-3 tracking-tight">
-              Admin Portal
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'var(--bg-primary)' }}>
+        <div className="modal-content animate-pop" style={{ maxWidth: '420px', width: '100%', padding: '32px 24px' }}>
+          
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '2.5rem', letterSpacing: '2px', color: 'var(--text-primary)', textShadow: '2px 2px 0 var(--accent-blue)', margin: 0, lineHeight: 1.2 }}>
+              🕵️ SECURE PORTAL
             </h2>
-            <p className="text-slate-500 font-medium">Verify your credentials</p>
+            <p style={{ marginTop: '8px', fontSize: '1rem', color: '#555', fontWeight: 'bold' }}>Authorized Personnel Only</p>
           </div>
           
           {loginError && (
-            <div className="mb-8 p-4 bg-red-50/50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium text-center">
-              {loginError}
+            <div className="pixel-border-sm animate-wiggle" style={{ background: '#FF5252', padding: '12px', marginBottom: '20px', fontFamily: 'var(--font-comic)', color: '#FFF', fontSize: '14px', textAlign: 'center', fontWeight: 'bold' }}>
+              💥 {loginError}
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-6">
-            <div className="group">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 group-focus-within:text-indigo-500 transition-colors">Username</label>
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div>
+              <label style={{ fontFamily: 'var(--font-comic)', fontWeight: 'bold', display: 'block', marginBottom: '6px', fontSize: '1rem' }}>
+                ID NUMBER 🆔
+              </label>
               <input
                 type="text"
+                className="comic-input"
+                placeholder="Enter ID..."
                 value={username}
-                onChange={e => setUsername(e.target.value)}
-                className="w-full p-4 bg-slate-50/50 border-2 border-slate-100 rounded-2xl text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
-                placeholder="ID"
+                onChange={(e) => setUsername(e.target.value)}
+                style={{ padding: '14px', fontSize: '1.2rem' }}
               />
             </div>
-            <div className="group">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 group-focus-within:text-indigo-500 transition-colors">Password</label>
+            <div>
+              <label style={{ fontFamily: 'var(--font-comic)', fontWeight: 'bold', display: 'block', marginBottom: '6px', fontSize: '1rem' }}>
+                TOP SECRET PASS 🔑
+              </label>
               <input
                 type="password"
+                className="comic-input"
+                placeholder="Enter pass..."
                 value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full p-4 bg-slate-50/50 border-2 border-slate-100 rounded-2xl text-slate-800 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
-                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ padding: '14px', fontSize: '1.2rem' }}
               />
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-6 w-full py-4 px-6 text-lg font-bold text-white rounded-2xl bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 active:scale-[0.98] transition-all shadow-lg shadow-indigo-600/30 disabled:opacity-70 disabled:active:scale-100"
-            >
-              {loading ? 'Authenticating...' : 'Secure SignIn'}
+            <button type="submit" className="comic-btn" disabled={loading} style={{ background: 'var(--accent-purple)', marginTop: '12px', width: '100%', fontSize: '1.4rem' }}>
+              {loading ? '⏳ HACKING IN...' : '🔓 ENTER MAINFRAME'}
             </button>
           </form>
         </div>
@@ -161,127 +157,99 @@ export default function AdminPage() {
 
   // ---------- DASHBOARD VIEW ----------
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        
-        {/* Header Dashboard Nav */}
-        <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-6 sm:p-8 rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 mb-10 gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shadow-inner border border-indigo-100">
-              🗓️
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-blue-600 tracking-tight mb-1">
-                Bookings Review
-              </h1>
-              <p className="text-slate-500 font-medium">Select a date tab below to view allocated slots</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full sm:w-auto px-8 py-3 bg-white border-2 border-slate-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 text-slate-600 font-bold text-sm uppercase tracking-wider rounded-2xl transition-all active:scale-95"
-          >
-            Sign Out
-          </button>
-        </div>
-
-        {fetchError && (
-          <div className="mb-10 p-5 bg-red-50 border border-red-100 rounded-2xl text-red-600 font-medium text-center shadow-sm">
-            {fetchError}
-          </div>
-        )}
-        
-        {bookings.length === 0 && !fetchError && (
-          <div className="text-center py-24 px-6 border-2 border-dashed border-slate-200 rounded-[2rem] bg-white">
-            <div className="text-5xl mb-6">📭</div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-3 tracking-tight">No registered bookings yet</h3>
-            <p className="text-slate-500 font-medium">When users complete the form, records will appear here.</p>
-          </div>
-        )}
-
-        {/* Date Pagination Tabs */}
-        {bookings.length > 0 && uniqueDates.length > 0 && (
-          <div className="mb-8 overflow-hidden rounded-[2rem] bg-white p-2 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100">
-             <div className="flex overflow-x-auto gap-2 p-1 no-scrollbar">
-                {/* CSS to hide scrollbar for elegance */}
-                <style dangerouslySetInnerHTML={{__html: `
-                  .no-scrollbar::-webkit-scrollbar { display: none; }
-                  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-                `}} />
-
-                {uniqueDates.map(date => (
-                  <button
-                    key={date}
-                    onClick={() => setSelectedDate(date)}
-                    className={`flex-shrink-0 px-8 py-4 rounded-2xl font-bold transition-all duration-300 text-base sm:text-lg tracking-wide ${
-                      selectedDate === date
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 ring-1 ring-indigo-500'
-                        : 'bg-transparent text-slate-500 hover:bg-slate-50 hover:text-indigo-600'
-                    }`}
-                  >
-                    {date}
-                  </button>
-                ))}
-             </div>
-          </div>
-        )}
-
-        {/* Data Table for Selected Date */}
-        {selectedDate && (
-          <div className="animate-in fade-in zoom-in-95 duration-500 bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 overflow-hidden">
-            
-            {/* Table Header / Context */}
-            <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-              <h2 className="text-xl font-bold text-slate-800">Showing {displayedBookings.length} slots for <span className="text-indigo-600">{selectedDate}</span></h2>
-            </div>
-            
-            {/* The Table Grid */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr className="bg-white border-b border-slate-100 text-xs font-bold uppercase tracking-widest text-slate-400">
-                    <th className="p-6 w-32 pl-8">Time</th>
-                    <th className="p-6">Applicant Name</th>
-                    <th className="p-6">Phone Number</th>
-                    <th className="p-6">JKLU Entity ID</th>
-                    <th className="p-6">Roll Tag</th>
-                    <th className="p-6 pr-8">Ref / Form No</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {displayedBookings.map((b) => (
-                    <tr key={b._id} className="hover:bg-slate-50/80 transition-colors group">
-                      <td className="p-6 pl-8">
-                        <span className="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 font-extrabold rounded-xl text-sm border border-indigo-100 group-hover:bg-indigo-100 transition-colors tracking-wide">
-                          {b.timeSlot}
-                        </span>
-                      </td>
-                      <td className="p-6 font-bold text-slate-800 text-lg">{b.name}</td>
-                      <td className="p-6 font-semibold text-slate-600">{b.phone}</td>
-                      <td className="p-6">
-                        <span className="font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg text-sm border border-slate-200">
-                          {b.jkluId}
-                        </span>
-                      </td>
-                      <td className="p-6 font-semibold text-slate-600">{b.rollNumber}</td>
-                      <td className="p-6 font-bold text-slate-800 pr-8">{b.formNumber}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {displayedBookings.length === 0 && (
-              <div className="p-12 text-center text-slate-500 font-medium">
-                No slots booked for this specific date yet.
-              </div>
-            )}
-            
-          </div>
-        )}
-        
+    <div style={{ padding: '24px 16px', maxWidth: '1200px', margin: '0 auto', fontFamily: 'var(--font-comic)', paddingBottom: '80px' }}>
+      
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', marginBottom: '32px', padding: '24px', background: 'var(--bg-card)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', borderRadius: '8px' }}>
+        <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', letterSpacing: '1px', textShadow: '2px 2px 0 var(--accent-pink)', margin: 0 }}>
+          🎮 COMMAND CENTER
+        </h1>
+        <button className="comic-btn" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: '14px', background: '#FF5252', color: '#fff', border: '3px solid #111' }}>
+          🚪 EVACUATE
+        </button>
       </div>
+
+      {fetchError && (
+        <div className="pixel-border" style={{ background: '#FFCDD2', padding: '20px', marginBottom: '24px', color: '#B71C1C', fontWeight: 'bold' }}>
+          {fetchError}
+        </div>
+      )}
+
+      {/* Date Tabs (Pagination) */}
+      {uniqueDates.length > 0 && (
+        <div style={{ padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', overflowX: 'auto', marginBottom: '32px' }}>
+          {uniqueDates.map(date => (
+            <button
+              key={date}
+              className={`date-tab ${selectedDate === date ? 'active' : ''}`}
+              onClick={() => setSelectedDate(date)}
+              style={{ fontSize: '16px', padding: '12px 24px', flexShrink: 0 }}
+            >
+              🗓️ {date}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Bookings Ticket Grid */}
+      {selectedDate && (
+        <div style={{ position: 'relative' }}>
+          <div style={{ background: 'var(--bg-card)', display: 'inline-block', padding: '8px 16px', border: '3px solid var(--border-color)', boxShadow: '4px 4px 0 var(--shadow-color)', marginBottom: '24px', fontWeight: 'bold', fontSize: '1.2rem' }}>
+            TOTAL SECURED SLOTS: <span style={{ color: 'var(--accent-blue)', fontSize: '1.5rem' }}>{displayedBookings.length}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
+            {displayedBookings.length === 0 ? (
+              <div className="speech-bubble" style={{ background: '#fff', textAlign: 'center', padding: '60px 20px', gridColumn: '1 / -1', margin: '20px 0' }}>
+                <h3 style={{ fontSize: '24px', opacity: 0.8 }}>🦗 CRICKETS... NO BOOKINGS HERE YET</h3>
+                <p style={{ marginTop: '12px', fontSize: '18px' }}>Select another date above.</p>
+              </div>
+            ) : (
+              displayedBookings.map((b, index) => (
+                <div key={b._id} className="pixel-border animate-pop" style={{ background: '#fff', position: 'relative', animationDelay: `${index * 0.05}s`, borderRadius: '4px' }}>
+                  
+                  {/* Card Header -> Time Slot */}
+                  <div style={{ background: 'var(--accent-yellow)', padding: '16px 20px', borderBottom: '4px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '28px', fontWeight: 'bold' }}>⏰ {b.timeSlot}</span>
+                    <span style={{ background: 'var(--accent-green)', padding: '6px 12px', border: '2px solid #111', fontWeight: 'bold', fontSize: '12px', borderRadius: '4px', transform: 'rotate(5deg)' }}>
+                      BOOKED ✓
+                    </span>
+                  </div>
+                  
+                  {/* Card Body -> Hacker Details */}
+                  <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
+                    <div style={{ borderBottom: '2px dashed #ccc', paddingBottom: '12px' }}>
+                      <div style={{ fontSize: '14px', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>APPLICANT NAME</div>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--accent-pink)', marginTop: '4px' }}>{b.name}</div>
+                    </div>
+                    
+                    <div style={{ borderBottom: '2px dashed #ccc', paddingBottom: '12px' }}>
+                      <div style={{ fontSize: '14px', color: '#666', textTransform: 'uppercase', fontWeight: 'bold', letterSpacing: '1px' }}>COMMLINK (PHONE)</div>
+                      <div style={{ fontSize: '20px', fontWeight: 'bold', marginTop: '4px' }}>📞 {b.phone}</div>
+                    </div>
+                    
+                    {/* Identification Block */}
+                    <div style={{ padding: '16px', background: 'var(--bg-secondary)', border: '3px solid var(--border-color)', borderRadius: '4px', position: 'relative' }}>
+                      <div style={{ fontSize: '12px', fontFamily: 'var(--font-pixel)', marginBottom: '8px', opacity: 0.8 }}>// IDENTIFICATION DB</div>
+                      <div style={{ fontSize: '16px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
+                        <span style={{ color: '#666' }}>ID:</span> <strong style={{ marginLeft: '4px' }}>{b.jkluId}</strong>
+                      </div>
+                      <div style={{ fontSize: '16px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
+                        <span style={{ color: '#666' }}>ROLL:</span> <strong style={{ marginLeft: '4px' }}>{b.rollNumber}</strong>
+                      </div>
+                      <div style={{ fontSize: '16px', margin: '8px 0' }}>
+                        <span style={{ color: '#666' }}>FORM REF:</span> <strong style={{ marginLeft: '4px' }}>{b.formNumber}</strong>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
