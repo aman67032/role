@@ -26,7 +26,6 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
 
-  // Check if token exists on load
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (token) {
@@ -86,7 +85,6 @@ export default function AdminPage() {
     }
   };
 
-  // Group bookings by date
   const groupedBookings = bookings.reduce((acc, booking) => {
     if (!acc[booking.date]) acc[booking.date] = [];
     acc[booking.date].push(booking);
@@ -96,46 +94,44 @@ export default function AdminPage() {
   // ---------- LOGIN VIEW ----------
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex justify-center items-center p-4 sm:p-8 font-sans">
-        <div className="w-full max-w-md bg-white p-6 sm:p-10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-stone-100 transition-all">
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center p-4 antialiased">
+        <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-gray-100">
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-800 mb-2">
-              Admin Portal
-            </h2>
-            <p className="text-stone-500 text-sm sm:text-base">Sign in to manage bookings</p>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Admin Portal</h2>
+            <p className="text-gray-500">Sign in to manage slot bookings</p>
           </div>
           
           {loginError && (
-            <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-center text-sm">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium text-center">
               {loginError}
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4 sm:gap-5">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-stone-500 uppercase tracking-widest ml-1">Username</label>
+          <form onSubmit={handleLogin} className="flex flex-col gap-5">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                className="w-full p-3 sm:p-3.5 text-base bg-stone-50 border border-stone-200 rounded-xl text-stone-800 outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all placeholder-stone-400"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="Enter admin ID"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-stone-500 uppercase tracking-widest ml-1">Password</label>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full p-3 sm:p-3.5 text-base bg-stone-50 border border-stone-200 rounded-xl text-stone-800 outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all placeholder-stone-400"
+                className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 placeholder="Enter password"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="mt-4 w-full py-3 sm:py-3.5 px-4 text-sm sm:text-base font-bold text-white rounded-xl bg-stone-800 hover:bg-stone-700 focus:ring-4 focus:ring-stone-200 transform transition-all active:scale-[0.98] shadow-md disabled:opacity-50 disabled:active:scale-100"
+              className="mt-4 w-full py-4 px-4 text-lg font-bold text-white rounded-xl bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/30 disabled:opacity-70 disabled:active:scale-100"
             >
               {loading ? 'Authenticating...' : 'Sign In'}
             </button>
@@ -145,101 +141,96 @@ export default function AdminPage() {
     );
   }
 
-  // ---------- DASHBOARD VIEW (TIMELINE) ----------
+  // ---------- DASHBOARD VIEW ----------
   return (
-    <div className="min-h-screen bg-[#FDFBF7] font-sans text-stone-800">
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
+    <div className="min-h-screen bg-gray-50 text-gray-900 antialiased font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-200 pb-6 mb-8 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-1">
-              Bookings Overview
-            </h1>
-            <p className="text-sm sm:text-base text-stone-500">Chronological timeline of scheduled slots</p>
+        {/* Header Dashboard Nav */}
+        <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-10 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">📅</span>
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700">
+                Bookings Dashboard
+              </h1>
+              <p className="text-sm text-gray-500 font-medium">Manage all scheduled slots</p>
+            </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full sm:w-auto px-5 py-2 sm:py-2.5 bg-white hover:bg-stone-50 text-stone-700 font-semibold rounded-lg border border-stone-200 transition-all shadow-sm active:scale-95 text-sm sm:text-base"
+            className="w-full sm:w-auto px-6 py-2.5 bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-700 font-bold rounded-xl transition-all"
           >
             Sign Out
           </button>
         </div>
 
         {fetchError && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm sm:text-base font-medium text-center">
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 font-medium text-center shadow-sm">
             {fetchError}
           </div>
         )}
         
         {bookings.length === 0 && !fetchError && (
-          <div className="text-center py-16 sm:py-24 px-4 border-2 border-dashed border-stone-200 rounded-2xl bg-stone-50/50">
-            <h3 className="text-lg sm:text-xl text-stone-600 font-medium mb-1">No bookings yet</h3>
-            <p className="text-stone-400 text-sm sm:text-base">As users book slots, they will appear here automatically.</p>
+          <div className="text-center py-20 px-4 border-2 border-dashed border-gray-300 rounded-3xl bg-gray-50/50">
+            <div className="text-4xl mb-4">📭</div>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">No bookings yet</h3>
+            <p className="text-gray-500">When users book slots, they will appear here in a structured table.</p>
           </div>
         )}
 
-        {/* Timeline */}
-        <div className="flex flex-col gap-12 sm:gap-16">
+        {/* Data Tables Grouped by Date */}
+        <div className="flex flex-col gap-10">
           {Object.keys(groupedBookings).sort().map(date => (
-            <div key={date}>
+            <div key={date} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               
-              {/* Date Header */}
-              <div className="inline-block mb-6 sm:mb-8">
-                <div className="bg-white border border-stone-200 shadow-sm px-5 py-2 rounded-full flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  <h2 className="text-sm sm:text-base font-bold text-stone-800 uppercase tracking-widest">{date}</h2>
+              {/* Date Badge */}
+              <div className="flex items-center gap-3 mb-4 pl-2">
+                <div className="w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]"></div>
+                <h2 className="text-xl font-bold text-gray-800 tracking-wide">{date}</h2>
+                <div className="h-px bg-gray-300 flex-grow ml-4 rounded-full"></div>
+              </div>
+              
+              {/* Table Container */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                      <tr className="bg-gray-50/80 border-b border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500">
+                        <th className="p-5 w-32">Time Slot</th>
+                        <th className="p-5">Full Name</th>
+                        <th className="p-5">Phone</th>
+                        <th className="p-5">JKLU ID</th>
+                        <th className="p-5">Roll No</th>
+                        <th className="p-5">Form No</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {groupedBookings[date].map((b, i) => (
+                        <tr key={b._id} className="hover:bg-blue-50/50 transition-colors group">
+                          <td className="p-5">
+                            <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 font-bold rounded-lg text-sm border border-blue-200 group-hover:bg-blue-200 transition-colors">
+                              {b.timeSlot}
+                            </span>
+                          </td>
+                          <td className="p-5 font-bold text-gray-900">{b.name}</td>
+                          <td className="p-5 font-medium text-gray-600">{b.phone}</td>
+                          <td className="p-5">
+                            <span className="font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded border border-gray-200 text-sm">
+                              {b.jkluId}
+                            </span>
+                          </td>
+                          <td className="p-5 font-medium text-gray-600">{b.rollNumber}</td>
+                          <td className="p-5 font-bold text-gray-900">{b.formNumber}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              
-              <div className="relative border-l-2 border-stone-200 ml-4 sm:ml-8 pl-6 sm:pl-8 space-y-8 sm:space-y-12 pb-4">
-                {groupedBookings[date].map((b) => (
-                  <div key={b._id} className="relative group">
-                    
-                    {/* Timeline Node */}
-                    <div className="absolute w-4 h-4 sm:w-5 sm:h-5 bg-amber-500 rounded-full -left-[33px] sm:-left-[43px] top-[4px] sm:top-[6px] ring-4 ring-[#FDFBF7] transition-all duration-300"></div>
-                    
-                    {/* Time Slot Label */}
-                    <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-3 sm:mb-4 flex items-center gap-3">
-                      {b.timeSlot}
-                      <span className="h-px bg-stone-200 flex-grow rounded-full max-w-[60px] sm:max-w-[100px]"></span>
-                    </h3>
-                    
-                    {/* Booking Card */}
-                    <div className="bg-white p-5 sm:p-6 rounded-2xl border border-stone-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 sm:gap-y-6 gap-x-6">
-                        <div>
-                          <span className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1 block">Full Name</span>
-                          <div className="text-base sm:text-lg text-stone-800 font-medium">{b.name}</div>
-                        </div>
-                        
-                        <div>
-                          <span className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1 block">Phone Number</span>
-                          <div className="text-base sm:text-lg text-stone-800 font-medium">{b.phone}</div>
-                        </div>
-                        
-                        <div>
-                          <span className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1 block">JKLU ID</span>
-                          <div className="inline-block px-2.5 py-1 rounded-md bg-stone-100 text-stone-700 border border-stone-200 text-sm sm:text-base font-semibold tracking-wide">
-                            {b.jkluId}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <span className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1 block">Roll Number</span>
-                          <div className="text-base sm:text-lg text-stone-800 font-medium">{b.rollNumber}</div>
-                        </div>
-                        
-                        <div className="sm:col-span-2 lg:col-span-2">
-                          <span className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1 block">Form Number</span>
-                          <div className="text-base sm:text-lg text-stone-800 font-medium">{b.formNumber}</div>
-                        </div>
-                      </div>
-                    </div>
 
-                  </div>
-                ))}
-              </div>
             </div>
           ))}
         </div>
