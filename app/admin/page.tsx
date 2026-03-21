@@ -96,41 +96,41 @@ export default function AdminPage() {
   // ---------- LOGIN VIEW ----------
   if (!isLoggedIn) {
     return (
-      <div style={{ fontFamily: '"Times New Roman", Times, serif', minHeight: '100vh', backgroundColor: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-        <div style={{ backgroundColor: 'white', padding: '50px 40px', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', maxWidth: '500px', width: '100%', border: '1px solid #e5e7eb' }}>
-          <h2 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '40px', textAlign: 'center', color: '#111827', margin: '0 0 30px 0' }}>Administration</h2>
+      <div className="font-[times_new_roman,serif] min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-6 sm:p-10 rounded-xl shadow-lg max-w-lg w-full border border-gray-200">
+          <h2 className="text-4xl sm:text-5xl font-bold mb-8 text-center text-gray-900 leading-tight">Administration</h2>
           
           {loginError && (
-            <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '16px', borderRadius: '6px', marginBottom: '24px', fontSize: '1.25rem', border: '1px solid #f87171' }}>
+            <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6 text-lg border border-red-400">
               {loginError}
             </div>
           )}
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+          <form onSubmit={handleLogin} className="flex flex-col gap-6">
             <div>
-              <label style={{ display: 'block', fontSize: '1.35rem', fontWeight: 'bold', marginBottom: '12px', color: '#374151' }}>Username</label>
+              <label className="block text-xl font-bold mb-2 text-gray-700">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                style={{ width: '100%', padding: '16px', fontSize: '1.5rem', border: '2px solid #d1d5db', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'inherit' }}
+                className="w-full p-4 text-xl border-2 border-gray-300 rounded-md outline-none focus:border-gray-800 transition-colors"
                 placeholder="Enter your ID"
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '1.35rem', fontWeight: 'bold', marginBottom: '12px', color: '#374151' }}>Password</label>
+              <label className="block text-xl font-bold mb-2 text-gray-700">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                style={{ width: '100%', padding: '16px', fontSize: '1.5rem', border: '2px solid #d1d5db', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', fontFamily: 'inherit' }}
+                className="w-full p-4 text-xl border-2 border-gray-300 rounded-md outline-none focus:border-gray-800 transition-colors"
                 placeholder="Enter your password"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              style={{ backgroundColor: '#111827', color: 'white', padding: '20px', fontSize: '1.75rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: loading ? 'not-allowed' : 'pointer', marginTop: '20px', fontFamily: 'inherit', transition: 'opacity 0.2s' }}
+              className="bg-gray-900 text-white p-4 text-2xl font-bold rounded-md hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 active:bg-gray-900 transition-all disabled:opacity-50 mt-4"
             >
               {loading ? 'Authenticating...' : 'Secure Login'}
             </button>
@@ -142,82 +142,82 @@ export default function AdminPage() {
 
   // ---------- DASHBOARD VIEW (TIMELINE) ----------
   return (
-    <div style={{ fontFamily: '"Times New Roman", Times, serif', minHeight: '100vh', backgroundColor: '#f9fafb', padding: '60px 20px', color: '#111827' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div className="font-[times_new_roman,serif] min-h-screen bg-gray-50 p-6 sm:p-12 text-gray-900">
+      <div className="max-w-5xl mx-auto">
         
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #e5e7eb', paddingBottom: '30px', marginBottom: '50px', flexWrap: 'wrap', gap: '20px' }}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b-4 border-gray-200 pb-8 mb-10 gap-6">
           <div>
-            <h1 style={{ fontSize: '3.5rem', fontWeight: 'bold', margin: '0 0 10px 0', color: '#111827' }}>Booking Administration</h1>
-            <p style={{ fontSize: '1.5rem', color: '#6b7280', margin: 0 }}>Review all scheduled slots in chronological order.</p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold m-0 text-gray-900 leading-tight">Booking Administration</h1>
+            <p className="text-xl sm:text-2xl text-gray-500 mt-2">Review all scheduled slots in chronological order.</p>
           </div>
           <button
             onClick={handleLogout}
-            style={{ backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '16px 32px', fontSize: '1.5rem', fontWeight: 'bold', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.2)' }}
+            className="w-full sm:w-auto bg-red-500 text-white border-none py-3 px-8 text-xl sm:text-2xl font-bold rounded-md cursor-pointer shadow hover:bg-red-600 transition-colors"
           >
             Logout
           </button>
         </div>
 
         {fetchError && (
-          <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '24px', fontSize: '1.75rem', borderRadius: '8px', marginBottom: '40px', border: '1px solid #f87171' }}>
+          <div className="bg-red-50 text-red-800 p-6 text-xl sm:text-2xl rounded-md mb-10 border border-red-400">
             {fetchError}
           </div>
         )}
         
         {bookings.length === 0 && !fetchError && (
-          <div style={{ textAlign: 'center', padding: '80px 20px', fontSize: '2.5rem', color: '#6b7280', border: '3px dashed #d1d5db', borderRadius: '16px', backgroundColor: '#f3f4f6' }}>
+          <div className="text-center p-10 sm:p-20 text-3xl text-gray-500 border-4 border-dashed border-gray-300 rounded-xl bg-gray-100">
             No bookings have been made yet.
           </div>
         )}
 
         {/* Timeline */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '80px' }}>
+        <div className="flex flex-col gap-16">
           {Object.keys(groupedBookings).sort().map(date => (
             <div key={date}>
-              <div style={{ display: 'inline-block', backgroundColor: '#111827', color: 'white', padding: '16px 32px', borderRadius: '50px', marginBottom: '40px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0 }}>Date: {date}</h2>
+              <div className="inline-block bg-gray-900 text-white py-3 px-8 rounded-full mb-8 shadow-md">
+                <h2 className="text-2xl sm:text-4xl font-bold m-0 tracking-wide">Date: {date}</h2>
               </div>
               
-              <div style={{ position: 'relative', borderLeft: '6px solid #d1d5db', marginLeft: '32px', paddingLeft: '40px' }}>
+              <div className="relative border-l-4 sm:border-l-8 border-gray-300 ml-4 sm:ml-8 pl-6 sm:pl-10">
                 {groupedBookings[date].map((b) => (
-                  <div key={b._id} style={{ position: 'relative', marginBottom: '60px' }}>
+                  <div key={b._id} className="relative mb-14">
                     
                     {/* Timeline Node */}
-                    <div style={{ position: 'absolute', width: '28px', height: '28px', backgroundColor: '#3b82f6', borderRadius: '50%', left: '-57px', top: '6px', border: '6px solid #f9fafb', boxShadow: '0 0 0 2px #d1d5db' }}></div>
+                    <div className="absolute w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded-full -left-[30px] sm:-left-[46px] top-1 sm:top-2 border-4 sm:border-8 border-gray-50 shadow-sm ring-2 ring-gray-300"></div>
                     
                     {/* Time Slot Header */}
-                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#1e3a8a', margin: '0 0 20px 0', display: 'flex', alignItems: 'center' }}>
-                      <span style={{ display: 'inline-block', borderBottom: '3px solid #bfdbfe', paddingBottom: '4px' }}>{b.timeSlot}</span>
+                    <h3 className="text-3xl sm:text-4xl font-bold text-blue-900 mb-4 inline-block border-b-4 border-blue-200 pb-1">
+                      {b.timeSlot}
                     </h3>
                     
                     {/* Details Card */}
-                    <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02)' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
+                    <div className="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-lg">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                         
-                        <div>
-                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Full Name</strong>
-                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.name}</div>
+                        <div className="break-words">
+                          <strong className="text-lg sm:text-xl text-gray-500 block mb-1 uppercase tracking-wider">Full Name</strong>
+                          <div className="text-2xl sm:text-3xl font-bold text-gray-900">{b.name}</div>
                         </div>
                         
-                        <div>
-                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Phone Number</strong>
-                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.phone}</div>
+                        <div className="break-words">
+                          <strong className="text-lg sm:text-xl text-gray-500 block mb-1 uppercase tracking-wider">Phone Number</strong>
+                          <div className="text-2xl sm:text-3xl font-bold text-gray-900">{b.phone}</div>
                         </div>
                         
-                        <div>
-                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>JKLU ID</strong>
-                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827', padding: '4px 12px', backgroundColor: '#f3f4f6', borderRadius: '4px', display: 'inline-block' }}>{b.jkluId}</div>
+                        <div className="break-words">
+                          <strong className="text-lg sm:text-xl text-gray-500 block mb-1 uppercase tracking-wider">JKLU ID</strong>
+                          <div className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded inline-block">{b.jkluId}</div>
                         </div>
                         
-                        <div>
-                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Roll Number</strong>
-                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.rollNumber}</div>
+                        <div className="break-words">
+                          <strong className="text-lg sm:text-xl text-gray-500 block mb-1 uppercase tracking-wider">Roll Number</strong>
+                          <div className="text-2xl sm:text-3xl font-bold text-gray-900">{b.rollNumber}</div>
                         </div>
                         
-                        <div>
-                          <strong style={{ fontSize: '1.35rem', color: '#6b7280', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Form Number</strong>
-                          <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#111827' }}>{b.formNumber}</div>
+                        <div className="break-words lg:col-span-2">
+                          <strong className="text-lg sm:text-xl text-gray-500 block mb-1 uppercase tracking-wider">Form Number</strong>
+                          <div className="text-2xl sm:text-3xl font-bold text-gray-900">{b.formNumber}</div>
                         </div>
 
                       </div>
