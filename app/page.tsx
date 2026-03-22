@@ -9,6 +9,7 @@ const DATES = [
   { value: '2026-03-24', label: 'MAR 24', day: 'TUE' },
   { value: '2026-03-25', label: 'MAR 25', day: 'WED' },
   { value: '2026-03-26', label: 'MAR 26', day: 'THU' },
+  { value: '2026-03-27', label: 'MAR 27', day: 'FRI' },
 ];
 
 const SLOT_LABELS: Record<string, string> = {
@@ -227,7 +228,7 @@ export default function Home() {
         color: 'var(--text-secondary)',
         letterSpacing: '0.5px',
       }}>
-        ★ March 23 – 26, 2026 ★ 9:30 AM to 5:00 PM ★
+        ★ March 23 – 27, 2026 ★ 9:30 AM to 5:00 PM ★
       </div>
 
       {/* ========== BOOKING MODAL ========== */}
