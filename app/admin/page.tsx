@@ -92,6 +92,30 @@ export default function AdminPage() {
     }
   };
 
+  const handleExport = async () => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/admin/bookings/export`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Export failed');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ep_all_bookings_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert('Failed to export data');
+    }
+  };
+
   const uniqueDates = useMemo(() => Array.from(new Set(bookings.map(b => b.date))).sort(), [bookings]);
 
   const displayedBookings = useMemo(() => {
@@ -164,9 +188,14 @@ export default function AdminPage() {
         <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', letterSpacing: '1px', textShadow: '2px 2px 0 var(--accent-pink)', margin: 0, fontWeight: '900' }}>
           🎮 COMMAND CENTER
         </h1>
-        <button className="comic-btn" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: '14px', background: '#FF5252', color: '#fff', border: '3px solid #111', fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}>
-          🚪 EVACUATE
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="comic-btn" onClick={handleExport} style={{ padding: '10px 20px', fontSize: '14px', background: 'var(--accent-blue)', color: '#fff', border: '3px solid #111', fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}>
+            📊 EXPORT ALL DATA
+          </button>
+          <button className="comic-btn" onClick={handleLogout} style={{ padding: '10px 20px', fontSize: '14px', background: '#FF5252', color: '#fff', border: '3px solid #111', fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}>
+            🚪 EVACUATE
+          </button>
+        </div>
       </div>
 
       {fetchError && (
