@@ -28,7 +28,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers'>('oh-cores');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -37,6 +37,43 @@ export default function AdminPage() {
       fetchBookings(token);
     }
   }, []);
+
+  const uniqueDates = useMemo(() => {
+    const dates = Array.from(new Set(bookings.filter((b: Booking) => b.category === 'oh-cores').map((b: Booking) => b.date))).sort();
+    return dates;
+  }, [bookings]);
+
+  const displayedBookings = useMemo(() => {
+    if (viewMode === 'oh-cores') {
+      return bookings
+        .filter((b: Booking) => b.category === 'oh-cores' && b.date === selectedDate)
+        .sort((a: Booking, b: Booking) => {
+          const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
+          if (timeCompare !== 0) return timeCompare;
+          return (a.slotIndex || 0) - (b.slotIndex || 0);
+        });
+    } else {
+      // Volunteers view: show all volunteers across all dates
+      return bookings
+        .filter((b: Booking) => b.category === 'volunteers')
+        .sort((a: Booking, b: Booking) => {
+          // Sort by date first, then time
+          const dateCompare = a.date.localeCompare(b.date);
+          if (dateCompare !== 0) return dateCompare;
+          const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
+          if (timeCompare !== 0) return timeCompare;
+          return (a.slotIndex || 0) - (b.slotIndex || 0);
+        });
+    }
+  }, [bookings, selectedDate, viewMode]);
+
+  useEffect(() => {
+    if (viewMode === 'oh-cores' && uniqueDates.length > 0) {
+      if (!selectedDate || !uniqueDates.includes(selectedDate)) {
+        setSelectedDate(uniqueDates[0]);
+      }
+    }
+  }, [viewMode, uniqueDates, selectedDate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,17 +156,6 @@ export default function AdminPage() {
     }
   };
 
-  const uniqueDates = useMemo(() => Array.from(new Set(bookings.map(b => b.date))).sort(), [bookings]);
-
-  const displayedBookings = useMemo(() => {
-    return bookings
-      .filter(b => b.date === selectedDate && (selectedCategory === 'all' || b.category === selectedCategory))
-      .sort((a, b) => {
-        const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
-        if (timeCompare !== 0) return timeCompare;
-        return (a.slotIndex || 0) - (b.slotIndex || 0);
-      });
-  }, [bookings, selectedDate, selectedCategory]);
 
   // ---------- LOGIN VIEW ----------
   if (!isLoggedIn) {
@@ -205,50 +231,81 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Stats Bar */}
+      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '32px' }}>
+        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>TOTAL BOOKINGS</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-purple)' }}>{bookings.length}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>OH & CORES</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-blue)' }}>{bookings.filter((b: Booking) => b.category === 'oh-cores').length}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>VOLUNTEERS</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-pink)' }}>{bookings.filter((b: Booking) => b.category === 'volunteers').length}</div>
+        </div>
+      </div>
+
       {fetchError && (
         <div className="pixel-border" style={{ background: '#FFCDD2', padding: '20px', marginBottom: '24px', color: '#B71C1C', fontWeight: '800' }}>
           {fetchError}
         </div>
       )}
 
-      {/* Filters (Date + Category) */}
-      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '32px' }}>
-        {/* Date Tabs (Pagination) */}
-        {uniqueDates.length > 0 && (
-          <div style={{ flex: 2, padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', overflowX: 'auto' }}>
-            {uniqueDates.map(date => (
-              <button
-                key={date}
-                className={`date-tab ${selectedDate === date ? 'active' : ''}`}
-                onClick={() => setSelectedDate(date)}
-                style={{ fontSize: '16px', padding: '12px 24px', flexShrink: 0, fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}
-              >
-                🗓️ {date}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Category Filter */}
-        <div style={{ flex: 1, padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <label style={{ fontWeight: '800', fontSize: '14px' }}>FILTER:</label>
-          <select 
-            value={selectedCategory} 
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{ padding: '8px 12px', border: '3px solid #111', fontWeight: '800', fontFamily: 'system-ui, -apple-system, sans-serif' }}
-          >
-            <option value="all">ALL CATEGORIES</option>
-            <option value="oh-cores">OH/CORES</option>
-            <option value="volunteers">VOLUNTEERS</option>
-          </select>
-        </div>
+      {/* View Toggle */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', background: 'var(--bg-card)', padding: '12px', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)' }}>
+        <button
+          onClick={() => setViewMode('oh-cores')}
+          className={`comic-btn ${viewMode === 'oh-cores' ? 'active' : ''}`}
+          style={{ 
+            flex: 1, 
+            padding: '16px', 
+            background: viewMode === 'oh-cores' ? 'var(--accent-blue)' : '#eee',
+            color: viewMode === 'oh-cores' ? '#fff' : '#333',
+            fontSize: '1.1rem',
+            fontWeight: '900'
+          }}
+        >
+          🏰 OH & CORES
+        </button>
+        <button
+          onClick={() => setViewMode('volunteers')}
+          className={`comic-btn ${viewMode === 'volunteers' ? 'active' : ''}`}
+          style={{ 
+            flex: 1, 
+            padding: '16px', 
+            background: viewMode === 'volunteers' ? 'var(--accent-pink)' : '#eee',
+            color: viewMode === 'volunteers' ? '#fff' : '#333',
+            fontSize: '1.1rem',
+            fontWeight: '900'
+          }}
+        >
+          🤝 VOLUNTEERS
+        </button>
       </div>
 
+      {/* Date Tabs (Only for OH & Cores) */}
+      {viewMode === 'oh-cores' && uniqueDates.length > 0 && (
+        <div style={{ marginBottom: '32px', padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', overflowX: 'auto' }}>
+          {uniqueDates.map(date => (
+            <button
+              key={date}
+              className={`date-tab ${selectedDate === date ? 'active' : ''}`}
+              onClick={() => setSelectedDate(date)}
+              style={{ fontSize: '16px', padding: '12px 24px', flexShrink: 0, fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}
+            >
+              🗓️ {date}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Bookings Ticket Grid */}
-      {selectedDate && (
+      {(viewMode === 'volunteers' || selectedDate) && (
         <div style={{ position: 'relative' }}>
           <div style={{ background: 'var(--bg-card)', display: 'inline-block', padding: '10px 18px', border: '3px solid var(--border-color)', boxShadow: '4px 4px 0 var(--shadow-color)', marginBottom: '24px', fontWeight: '800', fontSize: '1.1rem' }}>
-            TOTAL SECURED SLOTS: <span style={{ color: 'var(--accent-blue)', fontSize: '1.4rem', fontWeight: '900' }}>{displayedBookings.length}</span>
+            {viewMode === 'oh-cores' ? 'SECURED SLOTS FOR THE DAY:' : 'ALL VOLUNTEER BOOKINGS:'} <span style={{ color: viewMode === 'oh-cores' ? 'var(--accent-blue)' : 'var(--accent-pink)', fontSize: '1.4rem', fontWeight: '900' }}>{displayedBookings.length}</span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
