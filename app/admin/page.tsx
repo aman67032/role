@@ -13,6 +13,8 @@ interface Booking {
   jkluId: string;
   rollNumber: string;
   formNumber: string;
+  category: string;
+  slotIndex: number;
   createdAt: string;
 }
 
@@ -26,6 +28,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -120,9 +123,13 @@ export default function AdminPage() {
 
   const displayedBookings = useMemo(() => {
     return bookings
-      .filter(b => b.date === selectedDate)
-      .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot));
-  }, [bookings, selectedDate]);
+      .filter(b => b.date === selectedDate && (selectedCategory === 'all' || b.category === selectedCategory))
+      .sort((a, b) => {
+        const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
+        if (timeCompare !== 0) return timeCompare;
+        return (a.slotIndex || 0) - (b.slotIndex || 0);
+      });
+  }, [bookings, selectedDate, selectedCategory]);
 
   // ---------- LOGIN VIEW ----------
   if (!isLoggedIn) {
@@ -204,21 +211,38 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Date Tabs (Pagination) */}
-      {uniqueDates.length > 0 && (
-        <div style={{ padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', overflowX: 'auto', marginBottom: '32px' }}>
-          {uniqueDates.map(date => (
-            <button
-              key={date}
-              className={`date-tab ${selectedDate === date ? 'active' : ''}`}
-              onClick={() => setSelectedDate(date)}
-              style={{ fontSize: '16px', padding: '12px 24px', flexShrink: 0, fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}
-            >
-              🗓️ {date}
-            </button>
-          ))}
+      {/* Filters (Date + Category) */}
+      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '32px' }}>
+        {/* Date Tabs (Pagination) */}
+        {uniqueDates.length > 0 && (
+          <div style={{ flex: 2, padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', overflowX: 'auto' }}>
+            {uniqueDates.map(date => (
+              <button
+                key={date}
+                className={`date-tab ${selectedDate === date ? 'active' : ''}`}
+                onClick={() => setSelectedDate(date)}
+                style={{ fontSize: '16px', padding: '12px 24px', flexShrink: 0, fontFamily: 'system-ui, -apple-system, sans-serif', fontWeight: '800' }}
+              >
+                🗓️ {date}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Category Filter */}
+        <div style={{ flex: 1, padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <label style={{ fontWeight: '800', fontSize: '14px' }}>FILTER:</label>
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            style={{ padding: '8px 12px', border: '3px solid #111', fontWeight: '800', fontFamily: 'system-ui, -apple-system, sans-serif' }}
+          >
+            <option value="all">ALL CATEGORIES</option>
+            <option value="oh-cores">OH/CORES</option>
+            <option value="volunteers">VOLUNTEERS</option>
+          </select>
         </div>
-      )}
+      </div>
 
       {/* Bookings Ticket Grid */}
       {selectedDate && (
@@ -239,10 +263,25 @@ export default function AdminPage() {
                   
                   {/* Card Header -> Time Slot */}
                   <div style={{ background: 'var(--accent-yellow)', padding: '16px 20px', borderBottom: '4px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '26px', fontWeight: '900', letterSpacing: '-0.5px' }}>⏰ {b.timeSlot}</span>
-                    <span style={{ background: 'var(--accent-green)', padding: '6px 12px', border: '2px solid #111', fontWeight: '900', fontSize: '11px', borderRadius: '4px', transform: 'rotate(5deg)' }}>
-                      BOOKED ✓
+                    <span style={{ fontSize: '26px', fontWeight: '900', letterSpacing: '-0.5px' }}>
+                      ⏰ {b.timeSlot} {b.slotIndex > 0 ? `(${b.slotIndex + 1})` : ''}
                     </span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{ 
+                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : 'var(--accent-blue)', 
+                        padding: '4px 8px', 
+                        color: '#fff', 
+                        fontSize: '10px', 
+                        fontWeight: '900', 
+                        borderRadius: '2px',
+                        border: '1px solid #111'
+                      }}>
+                        {b.category?.toUpperCase() || 'OH-CORES'}
+                      </span>
+                      <span style={{ background: 'var(--accent-green)', padding: '6px 12px', border: '2px solid #111', fontWeight: '900', fontSize: '11px', borderRadius: '4px', transform: 'rotate(5deg)' }}>
+                        BOOKED ✓
+                      </span>
+                    </div>
                   </div>
                   
                   {/* Card Body -> Hacker Details */}

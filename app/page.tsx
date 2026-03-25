@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-const DATES = [
+const OH_CORES_DATES = [
   { value: '2026-03-23', label: 'MAR 23', day: 'MON' },
   { value: '2026-03-24', label: 'MAR 24', day: 'TUE' },
   { value: '2026-03-25', label: 'MAR 25', day: 'WED' },
@@ -12,12 +12,25 @@ const DATES = [
   { value: '2026-03-27', label: 'MAR 27', day: 'FRI' },
 ];
 
+const VOLUNTEER_DATES = [
+  { value: '2026-03-28', label: 'MAR 28', day: 'SAT' },
+  { value: '2026-03-30', label: 'MAR 30', day: 'MON' },
+  { value: '2026-04-01', label: 'APR 01', day: 'WED' },
+  { value: '2026-04-02', label: 'APR 02', day: 'THU' },
+  { value: '2026-04-03', label: 'APR 03', day: 'FRI' },
+  { value: '2026-04-04', label: 'APR 04', day: 'SAT' },
+  { value: '2026-04-06', label: 'APR 06', day: 'MON' },
+];
+
 const SLOT_LABELS: Record<string, string> = {
-  '09:30': '9:30 AM', '10:00': '10:00 AM', '10:30': '10:30 AM',
-  '11:00': '11:00 AM', '11:30': '11:30 AM', '12:00': '12:00 PM',
-  '12:30': '12:30 PM', '13:00': '1:00 PM', '13:30': '1:30 PM',
-  '14:00': '2:00 PM', '14:30': '2:30 PM', '15:00': '3:00 PM',
-  '15:30': '3:30 PM', '16:00': '4:00 PM', '16:30': '4:30 PM',
+  '09:30': '9:30 AM', '09:45': '9:45 AM', '10:00': '10:00 AM', '10:15': '10:15 AM', '10:30': '10:30 AM', '10:45': '10:45 AM',
+  '11:00': '11:00 AM', '11:15': '11:15 AM', '11:30': '11:30 AM', '11:45': '11:45 AM',
+  '12:00': '12:00 PM', '12:15': '12:15 PM', '12:30': '12:30 PM', '12:45': '12:45 PM',
+  '13:00': '1:00 PM', '13:15': '1:15 PM', '13:30': '1:30 PM', '13:45': '1:45 PM',
+  '14:00': '2:00 PM', '14:15': '2:15 PM', '14:30': '2:30 PM', '14:45': '2:45 PM',
+  '15:00': '3:00 PM', '15:15': '3:15 PM', '15:30': '3:30 PM', '15:45': '3:45 PM',
+  '16:00': '4:00 PM', '16:15': '4:15 PM', '16:30': '4:30 PM', '16:45': '4:45 PM',
+  '17:00': '5:00 PM', '17:15': '5:15 PM',
 };
 
 const SLOT_COLORS = [
@@ -34,10 +47,17 @@ interface FormData {
   formNumber: string;
 }
 
+interface Slot {
+  timeSlot: string;
+  slotIndex: number;
+}
+
 export default function Home() {
-  const [selectedDate, setSelectedDate] = useState(DATES[0].value);
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [category, setCategory] = useState<'oh-cores' | 'volunteers'>('oh-cores');
+  const [selectedDate, setSelectedDate] = useState(OH_CORES_DATES[0].value);
+  const [bookedSlots, setBookedSlots] = useState<{timeSlot: string, slotIndex: number}[]>([]);
+  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+  const [allSlots, setAllSlots] = useState<Slot[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -47,32 +67,35 @@ export default function Home() {
     name: '', phone: '', jkluId: '', rollNumber: '', formNumber: '',
   });
 
+  const dates = category === 'volunteers' ? VOLUNTEER_DATES : OH_CORES_DATES;
+
   const fetchSlots = useCallback(async () => {
     try {
       setFetching(true);
-      const res = await fetch(`${API_URL}/api/slots?date=${selectedDate}`);
+      const res = await fetch(`${API_URL}/api/slots?date=${selectedDate}&category=${category}`);
       const data = await res.json();
       setBookedSlots(data.bookedSlots || []);
+      setAllSlots(data.allSlots || []);
     } catch {
       console.error('Failed to fetch slots');
     } finally {
       setFetching(false);
     }
-  }, [selectedDate]);
+  }, [selectedDate, category]);
 
   useEffect(() => { fetchSlots(); }, [fetchSlots]);
 
   useEffect(() => {
-    // 15 seconds polling prevents server overload while keeping data relatively fresh
+    // 15 seconds polling
     const interval = setInterval(fetchSlots, 15000); 
-    // Instantly refresh when the user switches back to this tab
     const handleFocus = () => fetchSlots();
     window.addEventListener('focus', handleFocus);
     return () => { clearInterval(interval); window.removeEventListener('focus', handleFocus); };
   }, [fetchSlots]);
 
-  const handleSlotClick = (slot: string) => {
-    if (bookedSlots.includes(slot)) return;
+  const handleSlotClick = (slot: Slot) => {
+    const isBooked = bookedSlots.some(b => b.timeSlot === slot.timeSlot && b.slotIndex === slot.slotIndex);
+    if (isBooked) return;
     setSelectedSlot(slot);
     setShowModal(true);
     setError('');
@@ -92,7 +115,13 @@ export default function Home() {
       const res = await fetch(`${API_URL}/api/book`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: selectedDate, timeSlot: selectedSlot, ...formData }),
+        body: JSON.stringify({ 
+          date: selectedDate, 
+          timeSlot: selectedSlot.timeSlot, 
+          slotIndex: selectedSlot.slotIndex,
+          category,
+          ...formData 
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -111,8 +140,7 @@ export default function Home() {
     }
   };
 
-  const allSlots = Object.keys(SLOT_LABELS);
-  const availableSlots = allSlots.filter(s => !bookedSlots.includes(s));
+  const availableSlots = allSlots.filter(s => !bookedSlots.some(b => b.timeSlot === s.timeSlot && b.slotIndex === s.slotIndex));
 
   return (
     <div style={{ minHeight: '100vh', padding: '16px', maxWidth: '900px', margin: '0 auto' }}>
@@ -138,9 +166,48 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Category Toggle */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '32px' }}>
+        <button 
+          className={`comic-btn ${category === 'oh-cores' ? 'active' : ''}`}
+          style={{ 
+            background: category === 'oh-cores' ? 'var(--accent-yellow)' : '#eee',
+            fontSize: '14px',
+            padding: '10px 20px',
+            flex: 1,
+            maxWidth: '200px'
+          }}
+          onClick={() => {
+            setCategory('oh-cores');
+            setSelectedDate(OH_CORES_DATES[0].value);
+            setSelectedSlot(null);
+          }}
+        >
+          OH/CORES
+        </button>
+        <button 
+          className={`comic-btn ${category === 'volunteers' ? 'active' : ''}`}
+          style={{ 
+            background: category === 'volunteers' ? 'var(--accent-pink)' : '#eee',
+            fontSize: '14px',
+            padding: '10px 20px',
+            color: category === 'volunteers' ? '#fff' : '#111',
+            flex: 1,
+            maxWidth: '200px'
+          }}
+          onClick={() => {
+            setCategory('volunteers');
+            setSelectedDate(VOLUNTEER_DATES[0].value);
+            setSelectedSlot(null);
+          }}
+        >
+          VOLUNTEERS
+        </button>
+      </div>
+
       {/* Date Tabs */}
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
-        {DATES.map((d) => (
+        {dates.map((d) => (
           <button
             key={d.value}
             className={`date-tab ${selectedDate === d.value ? 'active' : ''}`}
@@ -182,11 +249,11 @@ export default function Home() {
           zIndex: 1,
         }}>
           {allSlots.map((slot, i) => {
-            const isBooked = bookedSlots.includes(slot);
-            const isSelected = selectedSlot === slot;
+            const isBooked = bookedSlots.some(b => b.timeSlot === slot.timeSlot && b.slotIndex === slot.slotIndex);
+            const isSelected = selectedSlot?.timeSlot === slot.timeSlot && selectedSlot?.slotIndex === slot.slotIndex;
             return (
               <div
-                key={slot}
+                key={`${slot.timeSlot}-${slot.slotIndex}`}
                 className={`slot-card ${isBooked ? 'booked' : ''} ${isSelected ? 'selected' : ''} animate-pop`}
                 style={{
                   animationDelay: `${i * 0.03}s`,
@@ -201,7 +268,8 @@ export default function Home() {
                   opacity: isBooked ? 0.3 : 1,
                   lineHeight: '1.4',
                 }}>
-                  {SLOT_LABELS[slot]}
+                  {SLOT_LABELS[slot.timeSlot]}
+                  {slot.slotIndex > 0 && ` (${slot.slotIndex + 1})`}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-comic)',
@@ -260,7 +328,7 @@ export default function Home() {
                     marginBottom: '10px',
                     lineHeight: '1.5',
                   }}>
-                    {selectedSlot && SLOT_LABELS[selectedSlot]} • {selectedDate}
+                    {selectedSlot && SLOT_LABELS[selectedSlot.timeSlot]} {selectedSlot && selectedSlot.slotIndex > 0 && `(${selectedSlot.slotIndex + 1})`} • {selectedDate}
                   </div>
                   <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '1.6rem', letterSpacing: '1px' }}>
                     📝 BOOK THIS SLOT!
