@@ -4,12 +4,14 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-const OH_CORES_DATES = [
-  { value: '2026-03-23', label: 'MAR 23', day: 'MON' },
-  { value: '2026-03-24', label: 'MAR 24', day: 'TUE' },
-  { value: '2026-03-25', label: 'MAR 25', day: 'WED' },
-  { value: '2026-03-26', label: 'MAR 26', day: 'THU' },
-  { value: '2026-03-27', label: 'MAR 27', day: 'FRI' },
+const VOLUNTEER_DATES = [
+  { value: '2026-03-28', label: 'MAR 28', day: 'SAT' },
+  { value: '2026-03-30', label: 'MAR 30', day: 'MON' },
+  { value: '2026-04-01', label: 'APR 01', day: 'WED' },
+  { value: '2026-04-02', label: 'APR 02', day: 'THU' },
+  { value: '2026-04-03', label: 'APR 03', day: 'FRI' },
+  { value: '2026-04-04', label: 'APR 04', day: 'SAT' },
+  { value: '2026-04-06', label: 'APR 06', day: 'MON' },
 ];
 
 const SLOT_LABELS: Record<string, string> = {
@@ -42,9 +44,9 @@ interface Slot {
   slotIndex: number;
 }
 
-export default function Home() {
-  const category = 'oh-cores';
-  const [selectedDate, setSelectedDate] = useState(OH_CORES_DATES[0].value);
+export default function VolunteerPage() {
+  const category = 'volunteers';
+  const [selectedDate, setSelectedDate] = useState(VOLUNTEER_DATES[0].value);
   const [bookedSlots, setBookedSlots] = useState<{timeSlot: string, slotIndex: number}[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
   const [allSlots, setAllSlots] = useState<Slot[]>([]);
@@ -56,7 +58,6 @@ export default function Home() {
   const [formData, setFormData] = useState<FormData>({
     name: '', phone: '', jkluId: '', rollNumber: '', formNumber: '',
   });
-
 
   const fetchSlots = useCallback(async () => {
     try {
@@ -135,8 +136,6 @@ export default function Home() {
     <div style={{ minHeight: '100vh', padding: '16px', maxWidth: '900px', margin: '0 auto' }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '28px', paddingTop: '16px' }}>
-        
-
         <h1 style={{
           fontFamily: 'var(--font-comic)',
           fontSize: 'clamp(1.8rem, 6vw, 3.5rem)',
@@ -145,19 +144,19 @@ export default function Home() {
           textShadow: '3px 3px 0 var(--accent-yellow), 5px 5px 0 var(--accent-pink)',
           lineHeight: 1.2,
         }}>
-          ⚡ SLOT BOOKING ⚡
+          ✨ VOLUNTEER BOOKING ✨
         </h1>
 
         <div className="speech-bubble" style={{ display: 'inline-block', marginTop: '14px' }}>
           <p style={{ fontFamily: 'var(--font-comic)', fontSize: '16px', lineHeight: '1.4', letterSpacing: '0.5px' }}>
-            Pick your date &amp; time slot!
+            Book your volunteer time slot!
           </p>
         </div>
       </div>
 
       {/* Date Tabs */}
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
-        {OH_CORES_DATES.map((d) => (
+        {VOLUNTEER_DATES.map((d) => (
           <button
             key={d.value}
             className={`date-tab ${selectedDate === d.value ? 'active' : ''}`}
@@ -173,7 +172,7 @@ export default function Home() {
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <div className="pixel-border-sm" style={{
           display: 'inline-block',
-          background: 'var(--accent-blue)',
+          background: 'var(--accent-pink)',
           padding: '10px 22px',
           fontFamily: 'var(--font-pixel)',
           fontSize: '11px',
@@ -246,7 +245,7 @@ export default function Home() {
         color: 'var(--text-secondary)',
         letterSpacing: '0.5px',
       }}>
-        ★ March 23 – 27, 2026 ★ 9:30 AM to 5:00 PM ★
+        ★ March 28 – April 6, 2026 ★ 9:30 AM to 5:15 PM ★
       </div>
 
       {/* ========== BOOKING MODAL ========== */}
@@ -262,7 +261,7 @@ export default function Home() {
                   BOOKED! ✅
                 </h2>
                 <p style={{ fontFamily: 'var(--font-comic)', fontSize: '15px', marginTop: '10px', color: '#555' }}>
-                  {selectedSlot && SLOT_LABELS[selectedSlot.timeSlot]} on {selectedDate}
+                   {selectedSlot && SLOT_LABELS[selectedSlot.timeSlot]} on {selectedDate}
                 </p>
               </div>
             ) : (
@@ -281,7 +280,7 @@ export default function Home() {
                     {selectedSlot && SLOT_LABELS[selectedSlot.timeSlot]} {selectedSlot && selectedSlot.slotIndex > 0 && `(${selectedSlot.slotIndex + 1})`} • {selectedDate}
                   </div>
                   <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '1.6rem', letterSpacing: '1px' }}>
-                    📝 BOOK THIS SLOT!
+                    📝 BOOK VOLUNTEER SLOT!
                   </h2>
                 </div>
 
