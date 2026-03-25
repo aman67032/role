@@ -55,6 +55,7 @@ export default function VolunteerPage() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [minLoadingComplete, setMinLoadingComplete] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormData>({
@@ -72,11 +73,23 @@ export default function VolunteerPage() {
       console.error('Failed to fetch slots');
     } finally {
       setFetching(false);
-      setInitialLoading(false);
     }
   }, [selectedDate]);
 
-  useEffect(() => { fetchSlots(); }, [fetchSlots]);
+  useEffect(() => {
+    fetchSlots();
+    // Minimum 5 seconds loading for the initial mount
+    const timer = setTimeout(() => {
+      setMinLoadingComplete(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [fetchSlots]);
+
+  useEffect(() => {
+    if (!fetching && minLoadingComplete) {
+      setInitialLoading(false);
+    }
+  }, [fetching, minLoadingComplete]);
 
   useEffect(() => {
     // 15 seconds polling

@@ -153,6 +153,7 @@ body {
   transition: border-color 0.15s;
   border-radius: 0;
   -webkit-appearance: none;
+  appearance: none;
 }
 .comic-input:focus {
   border-color: var(--accent-blue);
