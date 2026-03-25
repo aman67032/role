@@ -39,36 +39,22 @@ export default function AdminPage() {
   }, []);
 
   const uniqueDates = useMemo(() => {
-    const dates = Array.from(new Set(bookings.filter((b: Booking) => b.category === 'oh-cores').map((b: Booking) => b.date))).sort();
+    const dates = Array.from(new Set(bookings.filter((b: Booking) => b.category === viewMode).map((b: Booking) => b.date))).sort();
     return dates;
-  }, [bookings]);
+  }, [bookings, viewMode]);
 
   const displayedBookings = useMemo(() => {
-    if (viewMode === 'oh-cores') {
-      return bookings
-        .filter((b: Booking) => b.category === 'oh-cores' && b.date === selectedDate)
-        .sort((a: Booking, b: Booking) => {
-          const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
-          if (timeCompare !== 0) return timeCompare;
-          return (a.slotIndex || 0) - (b.slotIndex || 0);
-        });
-    } else {
-      // Volunteers view: show all volunteers across all dates
-      return bookings
-        .filter((b: Booking) => b.category === 'volunteers')
-        .sort((a: Booking, b: Booking) => {
-          // Sort by date first, then time
-          const dateCompare = a.date.localeCompare(b.date);
-          if (dateCompare !== 0) return dateCompare;
-          const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
-          if (timeCompare !== 0) return timeCompare;
-          return (a.slotIndex || 0) - (b.slotIndex || 0);
-        });
-    }
+    return bookings
+      .filter((b: Booking) => b.category === viewMode && b.date === selectedDate)
+      .sort((a: Booking, b: Booking) => {
+        const timeCompare = a.timeSlot.localeCompare(b.timeSlot);
+        if (timeCompare !== 0) return timeCompare;
+        return (a.slotIndex || 0) - (b.slotIndex || 0);
+      });
   }, [bookings, selectedDate, viewMode]);
 
   useEffect(() => {
-    if (viewMode === 'oh-cores' && uniqueDates.length > 0) {
+    if (uniqueDates.length > 0) {
       if (!selectedDate || !uniqueDates.includes(selectedDate)) {
         setSelectedDate(uniqueDates[0]);
       }
@@ -285,10 +271,10 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* Date Tabs (Only for OH & Cores) */}
-      {viewMode === 'oh-cores' && uniqueDates.length > 0 && (
+      {/* Date Tabs (For both modes) */}
+      {uniqueDates.length > 0 && (
         <div style={{ marginBottom: '32px', padding: '16px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', display: 'flex', gap: '12px', overflowX: 'auto' }}>
-          {uniqueDates.map(date => (
+          {uniqueDates.map((date: string) => (
             <button
               key={date}
               className={`date-tab ${selectedDate === date ? 'active' : ''}`}
@@ -302,10 +288,10 @@ export default function AdminPage() {
       )}
 
       {/* Bookings Ticket Grid */}
-      {(viewMode === 'volunteers' || selectedDate) && (
+      {selectedDate && (
         <div style={{ position: 'relative' }}>
           <div style={{ background: 'var(--bg-card)', display: 'inline-block', padding: '10px 18px', border: '3px solid var(--border-color)', boxShadow: '4px 4px 0 var(--shadow-color)', marginBottom: '24px', fontWeight: '800', fontSize: '1.1rem' }}>
-            {viewMode === 'oh-cores' ? 'SECURED SLOTS FOR THE DAY:' : 'ALL VOLUNTEER BOOKINGS:'} <span style={{ color: viewMode === 'oh-cores' ? 'var(--accent-blue)' : 'var(--accent-pink)', fontSize: '1.4rem', fontWeight: '900' }}>{displayedBookings.length}</span>
+            SECURED SLOTS FOR {selectedDate}: <span style={{ color: viewMode === 'oh-cores' ? 'var(--accent-blue)' : 'var(--accent-pink)', fontSize: '1.4rem', fontWeight: '900' }}>{displayedBookings.length}</span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '28px' }}>
