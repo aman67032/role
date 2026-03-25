@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import VolunteerLoader from '@/components/VolunteerLoader';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -53,6 +54,7 @@ export default function VolunteerPage() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormData>({
@@ -70,6 +72,7 @@ export default function VolunteerPage() {
       console.error('Failed to fetch slots');
     } finally {
       setFetching(false);
+      setInitialLoading(false);
     }
   }, [selectedDate]);
 
@@ -131,6 +134,10 @@ export default function VolunteerPage() {
   };
 
   const availableSlots = allSlots.filter(s => !bookedSlots.some(b => b.timeSlot === s.timeSlot && b.slotIndex === s.slotIndex));
+
+  if (initialLoading) {
+    return <VolunteerLoader />;
+  }
 
   return (
     <div style={{ minHeight: '100vh', padding: '16px', maxWidth: '900px', margin: '0 auto' }}>

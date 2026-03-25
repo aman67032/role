@@ -268,3 +268,91 @@ body {
     font-size: 15px;
   }
 }
+
+/* ========== VOLUNTEER LOADER ========== */
+.loader-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  font-family: var(--font-pixel), monospace;
+}
+
+.svg-frame {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  transform-style: preserve-3d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.svg-frame svg {
+  position: absolute;
+  transition: .5s;
+  z-index: calc(1 - (0.2 * var(--j)));
+  transform-origin: center;
+  width: 344px;
+  height: 344px;
+  fill: none;
+  /* Always on hover effect applied below */
+  transform: rotate(-80deg) skew(30deg) translateX(calc(45px * var(--i))) translateY(calc(-35px * var(--i)));
+}
+
+.svg-frame svg #center {
+  transition: .5s;
+  transform-origin: center;
+  /* Always on hover effect */
+  transform: rotate(-30deg) translateX(45px) translateY(-3px);
+}
+
+#out1 path { stroke: var(--accent-pink); }
+#out2 path { fill: var(--accent-blue); }
+#out3 { stroke: var(--accent-yellow); }
+#inner1 path { fill: var(--accent-pink); }
+#inner3 path { fill: var(--accent-blue); }
+#center1 { fill: var(--accent-yellow); }
+#center { stroke: var(--accent-blue); }
+
+#out2 {
+  animation: rotate16 7s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+#out3 {
+  animation: rotate16 3s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+#inner3,
+#inner1 {
+  animation: rotate16 4s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+#center1 {
+  animation: rotate16 2s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes rotate16 {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  font-size: 14px;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+  margin-top: 40px;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0 20px;
+}
