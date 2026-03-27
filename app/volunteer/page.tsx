@@ -5,10 +5,10 @@ import VolunteerLoader from '@/components/VolunteerLoader';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-const VOLUNTEER_DATES = [
-  { value: '2026-03-28', label: 'MAR 28', day: 'SAT' },
-  { value: '2026-03-30', label: 'MAR 30', day: 'MON' },
-  { value: '2026-04-01', label: 'APR 01', day: 'WED' },
+const VOLUNTEER_DATES: { value: string, label: string, day: string, blocked?: boolean }[] = [
+  { value: '2026-03-28', label: 'MAR 28', day: 'SAT', blocked: true },
+  { value: '2026-03-30', label: 'MAR 30', day: 'MON', blocked: true },
+  { value: '2026-04-01', label: 'APR 01', day: 'WED', blocked: true },
   { value: '2026-04-02', label: 'APR 02', day: 'THU' },
   { value: '2026-04-03', label: 'APR 03', day: 'FRI' },
   { value: '2026-04-04', label: 'APR 04', day: 'SAT' },
@@ -147,6 +147,7 @@ export default function VolunteerPage() {
   };
 
   const availableSlots = allSlots.filter(s => !bookedSlots.some(b => b.timeSlot === s.timeSlot && b.slotIndex === s.slotIndex));
+  const isSelectedDateBlocked = VOLUNTEER_DATES.find(d => d.value === selectedDate)?.blocked;
 
   if (initialLoading) {
     return <VolunteerLoader />;
@@ -210,49 +211,84 @@ export default function VolunteerPage() {
         border: '4px solid var(--border-color)',
         boxShadow: '6px 6px 0 var(--shadow-color)',
       }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-          gap: '10px',
-          position: 'relative',
-          zIndex: 1,
-        }}>
-          {allSlots.map((slot, i) => {
-            const isBooked = bookedSlots.some(b => b.timeSlot === slot.timeSlot && b.slotIndex === slot.slotIndex);
-            const isSelected = selectedSlot?.timeSlot === slot.timeSlot && selectedSlot?.slotIndex === slot.slotIndex;
-            return (
-              <div
-                key={`${slot.timeSlot}-${slot.slotIndex}`}
-                className={`slot-card ${isBooked ? 'booked' : ''} ${isSelected ? 'selected' : ''} animate-pop`}
-                style={{
-                  animationDelay: `${i * 0.03}s`,
-                  borderTop: isBooked ? undefined : `5px solid ${SLOT_COLORS[i % SLOT_COLORS.length]}`,
-                }}
-                onClick={() => !isBooked && handleSlotClick(slot)}
-              >
-                <div style={{
-                  fontFamily: 'var(--font-pixel)',
-                  fontSize: '11px',
-                  marginBottom: '6px',
-                  opacity: isBooked ? 0.3 : 1,
-                  lineHeight: '1.4',
-                }}>
-                  {SLOT_LABELS[slot.timeSlot]}
-                  {slot.slotIndex > 0 && ` (${slot.slotIndex + 1})`}
+        {isSelectedDateBlocked ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '40px 20px',
+            fontFamily: 'var(--font-comic)',
+            animation: 'fadeIn 0.5s ease-out'
+          }}>
+            <div style={{
+              fontSize: '3.5rem',
+              marginBottom: '15px',
+              filter: 'drop-shadow(3px 3px 0 #222)'
+            }}>
+              🔒
+            </div>
+            <h3 style={{
+              fontSize: '2rem',
+              color: 'var(--accent-pink)',
+              textShadow: '2px 2px 0 var(--border-color)',
+              marginBottom: '12px',
+              letterSpacing: '1px'
+            }}>
+              BOOKING CLOSED
+            </h3>
+            <p style={{
+              fontSize: '1.1rem',
+              color: 'var(--text-secondary)',
+              maxWidth: '400px',
+              margin: '0 auto',
+              lineHeight: '1.4'
+            }}>
+              Slots for this date are currently unavailable for booking. Please check other dates!
+            </p>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+            gap: '10px',
+            position: 'relative',
+            zIndex: 1,
+          }}>
+            {allSlots.map((slot, i) => {
+              const isBooked = bookedSlots.some(b => b.timeSlot === slot.timeSlot && b.slotIndex === slot.slotIndex);
+              const isSelected = selectedSlot?.timeSlot === slot.timeSlot && selectedSlot?.slotIndex === slot.slotIndex;
+              return (
+                <div
+                  key={`${slot.timeSlot}-${slot.slotIndex}`}
+                  className={`slot-card ${isBooked ? 'booked' : ''} ${isSelected ? 'selected' : ''} animate-pop`}
+                  style={{
+                    animationDelay: `${i * 0.03}s`,
+                    borderTop: isBooked ? undefined : `5px solid ${SLOT_COLORS[i % SLOT_COLORS.length]}`,
+                  }}
+                  onClick={() => !isBooked && handleSlotClick(slot)}
+                >
+                  <div style={{
+                    fontFamily: 'var(--font-pixel)',
+                    fontSize: '11px',
+                    marginBottom: '6px',
+                    opacity: isBooked ? 0.3 : 1,
+                    lineHeight: '1.4',
+                  }}>
+                    {SLOT_LABELS[slot.timeSlot]}
+                    {slot.slotIndex > 0 && ` (${slot.slotIndex + 1})`}
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-comic)',
+                    fontSize: '16px',
+                    color: isBooked ? '#999' : 'var(--accent-pink)',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                  }}>
+                    {isBooked ? 'BOOKED' : 'OPEN ✨'}
+                  </div>
                 </div>
-                <div style={{
-                  fontFamily: 'var(--font-comic)',
-                  fontSize: '16px',
-                  color: isBooked ? '#999' : 'var(--accent-pink)',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.5px',
-                }}>
-                  {isBooked ? 'BOOKED' : 'OPEN ✨'}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Footer */}
