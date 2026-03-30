@@ -5,11 +5,11 @@ import { useState, useEffect, useCallback } from 'react';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const OH_CORES_DATES = [
-  { value: '2026-03-23', label: 'MAR 23', day: 'MON' },
-  { value: '2026-03-24', label: 'MAR 24', day: 'TUE' },
-  { value: '2026-03-25', label: 'MAR 25', day: 'WED' },
-  { value: '2026-03-26', label: 'MAR 26', day: 'THU' },
-  { value: '2026-03-27', label: 'MAR 27', day: 'FRI' },
+  { value: '2026-03-23', label: 'MAR 23', day: 'MON' ,blocked: true},
+  { value: '2026-03-24', label: 'MAR 24', day: 'TUE' ,blocked: true},
+  { value: '2026-03-25', label: 'MAR 25', day: 'WED' ,blocked: true},
+  { value: '2026-03-26', label: 'MAR 26', day: 'THU' ,blocked: true},
+  { value: '2026-03-27', label: 'MAR 27', day: 'FRI' ,blocked: true},
 ];
 
 const SLOT_LABELS: Record<string, string> = {

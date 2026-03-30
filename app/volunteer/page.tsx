@@ -6,6 +6,7 @@ import VolunteerLoader from '@/components/VolunteerLoader';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const VOLUNTEER_DATES: { value: string, label: string, day: string, blocked?: boolean }[] = [
+  
   { value: '2026-03-28', label: 'MAR 28', day: 'SAT', blocked: true },
   { value: '2026-03-30', label: 'MAR 30', day: 'MON', blocked: true },
   { value: '2026-04-01', label: 'APR 01', day: 'WED', blocked: true },
@@ -13,6 +14,7 @@ const VOLUNTEER_DATES: { value: string, label: string, day: string, blocked?: bo
   { value: '2026-04-03', label: 'APR 03', day: 'FRI' ,blocked: true},
   { value: '2026-04-04', label: 'APR 04', day: 'SAT',blocked: true },
   { value: '2026-04-06', label: 'APR 06', day: 'MON' ,blocked: true},
+
 ];
 
 const SLOT_LABELS: Record<string, string> = {
