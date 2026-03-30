@@ -12,7 +12,7 @@ const VOLUNTEER_DATES: { value: string, label: string, day: string, blocked?: bo
   { value: '2026-04-02', label: 'APR 02', day: 'THU', blocked: true },
   { value: '2026-04-03', label: 'APR 03', day: 'FRI' ,blocked: true},
   { value: '2026-04-04', label: 'APR 04', day: 'SAT',blocked: true },
-  { value: '2026-04-06', label: 'APR 06', day: 'MON' ,blocked: true},
+  { value: '2026-04-06', label: 'APR 06', day: 'MON' },
 ];
 
 const SLOT_LABELS: Record<string, string> = {
