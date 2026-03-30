@@ -207,10 +207,10 @@ export default function Home() {
             textAlign: 'center',
             padding: '20px',
           }}>
-            📅 SLOTS CLOSED 📅
+            📅 BOOKING CLOSED 📅
           </div>
         )}
-        
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',

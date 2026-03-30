@@ -214,37 +214,22 @@ export default function VolunteerPage() {
         boxShadow: '6px 6px 0 var(--shadow-color)',
       }}>
         {isSelectedDateBlocked ? (
-          <div style={{
+             <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0,0,0,0.8)',
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '12px',
+            color: '#fff',
+            fontFamily: 'var(--font-pixel)',
+            fontSize: '24px',
             textAlign: 'center',
-            padding: '40px 20px',
-            fontFamily: 'var(--font-comic)',
-            animation: 'fadeIn 0.5s ease-out'
+            padding: '20px',
           }}>
-            <div style={{
-              fontSize: '3.5rem',
-              marginBottom: '15px',
-              filter: 'drop-shadow(3px 3px 0 #222)'
-            }}>
-              🔒
-            </div>
-            <h3 style={{
-              fontSize: '2rem',
-              color: 'var(--accent-pink)',
-              textShadow: '2px 2px 0 var(--border-color)',
-              marginBottom: '12px',
-              letterSpacing: '1px'
-            }}>
-              BOOKING CLOSED
-            </h3>
-            <p style={{
-              fontSize: '1.1rem',
-              color: 'var(--text-secondary)',
-              maxWidth: '400px',
-              margin: '0 auto',
-              lineHeight: '1.4'
-            }}>
-              Slots for this date are currently unavailable for booking. Please check other dates!
-            </p>
+            📅 BOOKING CLOSED 📅
           </div>
         ) : (
           <div style={{
