@@ -191,6 +191,26 @@ export default function Home() {
         border: '4px solid var(--border-color)',
         boxShadow: '6px 6px 0 var(--shadow-color)',
       }}>
+        {OH_CORES_DATES.find(d => d.value === selectedDate)?.blocked && (
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0,0,0,0.8)',
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '12px',
+            color: '#fff',
+            fontFamily: 'var(--font-pixel)',
+            fontSize: '24px',
+            textAlign: 'center',
+            padding: '20px',
+          }}>
+            📅 SLOTS CLOSED 📅
+          </div>
+        )}
+        
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
