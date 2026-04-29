@@ -29,10 +29,9 @@ const SLOT_COLORS = [
 
 interface FormData {
   name: string;
-  phone: string;
   jkluId: string;
   rollNumber: string;
-  formNumber: string;
+  committee: string;
 }
 
 interface Slot {
@@ -54,7 +53,7 @@ export default function AarambhPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState<FormData>({
-    name: '', phone: '', jkluId: '', rollNumber: '', formNumber: '',
+    name: '', jkluId: '', rollNumber: '', committee: '',
   });
 
   const fetchSlots = useCallback(async () => {
@@ -106,7 +105,7 @@ export default function AarambhPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSlot) return;
-    if (!formData.name || !formData.phone || !formData.jkluId || !formData.rollNumber || !formData.formNumber) {
+    if (!formData.name || !formData.jkluId || !formData.rollNumber || !formData.committee) {
       setError('All fields are required!');
       return;
     }
@@ -132,7 +131,7 @@ export default function AarambhPage() {
       }
       setSuccess(true);
       setBookedSlots(prev => [...prev, selectedSlot]);
-      setFormData({ name: '', phone: '', jkluId: '', rollNumber: '', formNumber: '' });
+      setFormData({ name: '', jkluId: '', rollNumber: '', committee: '' });
       setTimeout(() => { setShowModal(false); setSelectedSlot(null); setSuccess(false); }, 2500);
     } catch {
       setError('Network error! Try again.');
@@ -338,10 +337,9 @@ export default function AarambhPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {[
                       { key: 'name', label: 'NAME', placeholder: 'Your Name', type: 'text' },
-                      { key: 'phone', label: 'PHONE NUMBER', placeholder: 'Phone Number', type: 'tel' },
                       { key: 'jkluId', label: 'JKLU ID', placeholder: 'JKLU ID', type: 'text' },
                       { key: 'rollNumber', label: 'ROLL NUMBER', placeholder: 'Roll Number', type: 'text' },
-                      { key: 'formNumber', label: 'FORM NUMBER', placeholder: 'Form Number', type: 'text' },
+                      { key: 'committee', label: 'COMMITTEE', placeholder: 'Your Committee', type: 'text' },
                     ].map((field) => (
                       <div key={field.key}>
                         <label style={{

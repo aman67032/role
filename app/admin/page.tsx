@@ -15,6 +15,7 @@ interface Booking {
   formNumber: string;
   category: string;
   slotIndex: number;
+  committee?: string;
   createdAt: string;
 }
 
@@ -28,7 +29,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers'>('oh-cores');
+  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers' | 'leaders'>('oh-cores');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -231,6 +232,10 @@ export default function AdminPage() {
           <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>VOLUNTEERS</div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-pink)' }}>{bookings.filter((b: Booking) => b.category === 'volunteers').length}</div>
         </div>
+        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>AARAMBH</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-orange)' }}>{bookings.filter((b: Booking) => b.category === 'leaders').length}</div>
+        </div>
       </div>
 
       {fetchError && (
@@ -268,6 +273,20 @@ export default function AdminPage() {
           }}
         >
           🤝 VOLUNTEERS
+        </button>
+        <button
+          onClick={() => setViewMode('leaders')}
+          className={`comic-btn ${viewMode === 'leaders' ? 'active' : ''}`}
+          style={{ 
+            flex: 1, 
+            padding: '16px', 
+            background: viewMode === 'leaders' ? 'var(--accent-orange)' : '#eee',
+            color: viewMode === 'leaders' ? '#fff' : '#333',
+            fontSize: '1.1rem',
+            fontWeight: '900'
+          }}
+        >
+          🚀 AARAMBH
         </button>
       </div>
 
@@ -311,7 +330,7 @@ export default function AdminPage() {
                     </span>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ 
-                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : 'var(--accent-blue)', 
+                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : b.category === 'leaders' ? 'var(--accent-orange)' : 'var(--accent-blue)', 
                         padding: '4px 8px', 
                         color: '#fff', 
                         fontSize: '10px', 
@@ -335,10 +354,19 @@ export default function AdminPage() {
                       <div style={{ fontSize: '22px', fontWeight: '900', color: 'var(--accent-pink)', marginTop: '4px' }}>{b.name}</div>
                     </div>
                     
-                    <div style={{ borderBottom: '2px dashed #ccc', paddingBottom: '12px' }}>
-                      <div style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px' }}>COMMLINK (PHONE)</div>
-                      <div style={{ fontSize: '18px', fontWeight: '800', marginTop: '4px' }}>📞 {b.phone}</div>
-                    </div>
+                    {b.category !== 'leaders' && (
+                      <div style={{ borderBottom: '2px dashed #ccc', paddingBottom: '12px' }}>
+                        <div style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px' }}>COMMLINK (PHONE)</div>
+                        <div style={{ fontSize: '18px', fontWeight: '800', marginTop: '4px' }}>📞 {b.phone}</div>
+                      </div>
+                    )}
+                    
+                    {b.category === 'leaders' && (
+                      <div style={{ borderBottom: '2px dashed #ccc', paddingBottom: '12px' }}>
+                        <div style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px' }}>COMMITTEE</div>
+                        <div style={{ fontSize: '18px', fontWeight: '900', color: 'var(--accent-blue)', marginTop: '4px' }}>🏢 {b.committee}</div>
+                      </div>
+                    )}
                     
                     {/* Identification Block */}
                     <div style={{ padding: '16px', background: 'var(--bg-secondary)', border: '3px solid var(--border-color)', borderRadius: '4px', position: 'relative' }}>
@@ -349,9 +377,11 @@ export default function AdminPage() {
                       <div style={{ fontSize: '15px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
                         <span style={{ color: '#666', fontWeight: '700' }}>ROLL:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.rollNumber}</strong>
                       </div>
-                      <div style={{ fontSize: '15px', margin: '8px 0' }}>
-                        <span style={{ color: '#666', fontWeight: '700' }}>FORM REF:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.formNumber}</strong>
-                      </div>
+                      {b.category !== 'leaders' && (
+                        <div style={{ fontSize: '15px', margin: '8px 0' }}>
+                          <span style={{ color: '#666', fontWeight: '700' }}>FORM REF:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.formNumber}</strong>
+                        </div>
+                      )}
                     </div>
 
                   </div>
