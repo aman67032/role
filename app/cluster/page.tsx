@@ -6,7 +6,7 @@ const CLUSTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as
 type ClusterType = typeof CLUSTERS[number];
 
 interface Booking {
-  date: string; // '2026-06-01' or '2026-06-10'
+  date: string; // '2026-06-01' or '2026-06-02'
   timeSlot: string; // e.g. '11:00'
 }
 
@@ -14,7 +14,7 @@ type BookingsMap = Record<ClusterType, Booking | null>;
 
 const DATES = [
   { value: '2026-06-01', label: 'JUN 01', day: 'MON' },
-  { value: '2026-06-10', label: 'JUN 10', day: 'TUE' },
+  { value: '2026-06-02', label: 'JUN 02', day: 'TUE' },
 ];
 
 const TIME_SLOTS = [
@@ -67,7 +67,7 @@ export default function ClusterBookingPage() {
       
       const [res1, res2] = await Promise.all([
         fetch(`${API_URL}/api/slots?date=2026-06-01&category=clusters`),
-        fetch(`${API_URL}/api/slots?date=2026-06-10&category=clusters`)
+        fetch(`${API_URL}/api/slots?date=2026-06-02&category=clusters`)
       ]);
       
       if (!res1.ok || !res2.ok) {
@@ -79,7 +79,7 @@ export default function ClusterBookingPage() {
       
       const allBooked = [
         ...(data1.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-01' })),
-        ...(data2.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-10' }))
+        ...(data2.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-02' }))
       ];
       
       const newBookingsMap = {} as BookingsMap;
@@ -514,7 +514,7 @@ export default function ClusterBookingPage() {
         color: 'var(--text-secondary)',
         letterSpacing: '0.5px',
       }}>
-        ★ Monday 1 June &amp; Tuesday 10 June ★ 11:00 AM to 5:00 PM ★
+        ★ Monday 1 June &amp; Tuesday 2 June ★ 11:00 AM to 5:00 PM ★
       </div>
 
       {/* ========== CONFIRMATION MODAL ========== */}
