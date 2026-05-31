@@ -29,7 +29,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers' | 'leaders'>('oh-cores');
+  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers' | 'leaders' | 'clusters'>('oh-cores');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -220,21 +220,25 @@ export default function AdminPage() {
 
       {/* Stats Bar */}
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '32px' }}>
-        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+        <div style={{ flex: 1, minWidth: '150px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
           <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>TOTAL BOOKINGS</div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-purple)' }}>{bookings.length}</div>
         </div>
-        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+        <div style={{ flex: 1, minWidth: '150px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
           <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>OH & CORES</div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-blue)' }}>{bookings.filter((b: Booking) => b.category === 'oh-cores').length}</div>
         </div>
-        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+        <div style={{ flex: 1, minWidth: '150px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
           <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>VOLUNTEERS</div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-pink)' }}>{bookings.filter((b: Booking) => b.category === 'volunteers').length}</div>
         </div>
-        <div style={{ flex: 1, minWidth: '200px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+        <div style={{ flex: 1, minWidth: '150px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
           <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>AARAMBH</div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-orange)' }}>{bookings.filter((b: Booking) => b.category === 'leaders').length}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: '150px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>CLUSTERS</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-green)' }}>{bookings.filter((b: Booking) => b.category === 'clusters').length}</div>
         </div>
       </div>
 
@@ -245,12 +249,13 @@ export default function AdminPage() {
       )}
 
       {/* View Toggle */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', background: 'var(--bg-card)', padding: '12px', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)' }}>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '32px', background: 'var(--bg-card)', padding: '12px', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', flexWrap: 'wrap' }}>
         <button
           onClick={() => setViewMode('oh-cores')}
           className={`comic-btn ${viewMode === 'oh-cores' ? 'active' : ''}`}
           style={{ 
             flex: 1, 
+            minWidth: '150px',
             padding: '16px', 
             background: viewMode === 'oh-cores' ? 'var(--accent-blue)' : '#eee',
             color: viewMode === 'oh-cores' ? '#fff' : '#333',
@@ -265,6 +270,7 @@ export default function AdminPage() {
           className={`comic-btn ${viewMode === 'volunteers' ? 'active' : ''}`}
           style={{ 
             flex: 1, 
+            minWidth: '150px',
             padding: '16px', 
             background: viewMode === 'volunteers' ? 'var(--accent-pink)' : '#eee',
             color: viewMode === 'volunteers' ? '#fff' : '#333',
@@ -279,6 +285,7 @@ export default function AdminPage() {
           className={`comic-btn ${viewMode === 'leaders' ? 'active' : ''}`}
           style={{ 
             flex: 1, 
+            minWidth: '150px',
             padding: '16px', 
             background: viewMode === 'leaders' ? 'var(--accent-orange)' : '#eee',
             color: viewMode === 'leaders' ? '#fff' : '#333',
@@ -287,6 +294,21 @@ export default function AdminPage() {
           }}
         >
           🚀 AARAMBH
+        </button>
+        <button
+          onClick={() => setViewMode('clusters')}
+          className={`comic-btn ${viewMode === 'clusters' ? 'active' : ''}`}
+          style={{ 
+            flex: 1, 
+            minWidth: '150px',
+            padding: '16px', 
+            background: viewMode === 'clusters' ? 'var(--accent-green)' : '#eee',
+            color: viewMode === 'clusters' ? '#fff' : '#333',
+            fontSize: '1.1rem',
+            fontWeight: '900'
+          }}
+        >
+          ⚡ CLUSTERS
         </button>
       </div>
 
@@ -330,9 +352,9 @@ export default function AdminPage() {
                     </span>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ 
-                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : b.category === 'leaders' ? 'var(--accent-orange)' : 'var(--accent-blue)', 
+                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : b.category === 'leaders' ? 'var(--accent-orange)' : b.category === 'clusters' ? 'var(--accent-green)' : 'var(--accent-blue)', 
                         padding: '4px 8px', 
-                        color: '#fff', 
+                        color: b.category === 'clusters' ? '#111' : '#fff', 
                         fontSize: '10px', 
                         fontWeight: '900', 
                         borderRadius: '2px',

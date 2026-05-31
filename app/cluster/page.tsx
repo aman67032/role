@@ -15,22 +15,35 @@ type BookingsMap = Record<ClusterType, Booking | null>;
 const DATES = [
   { value: '2026-06-01', label: 'JUN 01', day: 'MON' },
   { value: '2026-06-02', label: 'JUN 02', day: 'TUE' },
+  { value: '2026-06-03', label: 'JUN 03', day: 'WED' },
 ];
 
-const TIME_SLOTS = [
-  { start: '11:00', label: '11:00 AM - 11:30 AM' },
-  { start: '11:30', label: '11:30 AM - 12:00 PM' },
-  { start: '12:00', label: '12:00 PM - 12:30 PM' },
-  { start: '12:30', label: '12:30 PM - 01:00 PM' },
-  { start: '13:00', label: '01:00 PM - 01:30 PM' },
-  { start: '13:30', label: '01:30 PM - 02:00 PM' },
-  { start: '14:00', label: '02:00 PM - 02:30 PM' },
-  { start: '14:30', label: '02:30 PM - 03:00 PM' },
-  { start: '15:00', label: '03:00 PM - 03:30 PM' },
-  { start: '15:30', label: '03:30 PM - 04:00 PM' },
-  { start: '16:00', label: '04:00 PM - 04:30 PM' },
-  { start: '16:30', label: '04:30 PM - 05:00 PM' },
-];
+const TIME_SLOT_LABELS: Record<string, string> = {
+  '11:00': '11:00 AM - 12:00 PM',
+  '12:00': '12:00 PM - 01:00 PM',
+  '13:00': '01:00 PM - 02:00 PM',
+  '14:00': '02:00 PM - 03:00 PM',
+  '15:00': '03:00 PM - 04:00 PM',
+  '16:00': '04:00 PM - 05:00 PM',
+};
+
+function getTimeSlotsForDate(date: string) {
+  if (date === '2026-06-03') {
+    return [
+      { start: '11:00', label: '11:00 AM - 12:00 PM' },
+      { start: '12:00', label: '12:00 PM - 01:00 PM' },
+      { start: '13:00', label: '01:00 PM - 02:00 PM' },
+    ];
+  }
+  return [
+    { start: '11:00', label: '11:00 AM - 12:00 PM' },
+    { start: '12:00', label: '12:00 PM - 01:00 PM' },
+    { start: '13:00', label: '01:00 PM - 02:00 PM' },
+    { start: '14:00', label: '02:00 PM - 03:00 PM' },
+    { start: '15:00', label: '03:00 PM - 04:00 PM' },
+    { start: '16:00', label: '04:00 PM - 05:00 PM' },
+  ];
+}
 
 const SLOT_COLORS = [
   '#FFD600', '#FF6B9D', '#4FC3F7', '#69F0AE', '#FFAB40',
@@ -65,21 +78,24 @@ export default function ClusterBookingPage() {
       setFetching(true);
       setError('');
       
-      const [res1, res2] = await Promise.all([
+      const [res1, res2, res3] = await Promise.all([
         fetch(`${API_URL}/api/slots?date=2026-06-01&category=clusters`),
-        fetch(`${API_URL}/api/slots?date=2026-06-02&category=clusters`)
+        fetch(`${API_URL}/api/slots?date=2026-06-02&category=clusters`),
+        fetch(`${API_URL}/api/slots?date=2026-06-03&category=clusters`)
       ]);
       
-      if (!res1.ok || !res2.ok) {
+      if (!res1.ok || !res2.ok || !res3.ok) {
         throw new Error('API request failed');
       }
 
       const data1 = await res1.json();
       const data2 = await res2.json();
+      const data3 = await res3.json();
       
       const allBooked = [
         ...(data1.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-01' })),
-        ...(data2.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-02' }))
+        ...(data2.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-02' })),
+        ...(data3.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-03' }))
       ];
       
       const newBookingsMap = {} as BookingsMap;
@@ -102,7 +118,7 @@ export default function ClusterBookingPage() {
       setBookings(newBookingsMap);
       
       // Update local slots array for the currently selected date tab
-      const currentData = selectedDate === '2026-06-01' ? data1 : data2;
+      const currentData = selectedDate === '2026-06-01' ? data1 : (selectedDate === '2026-06-02' ? data2 : data3);
       setAllSlots(currentData.allSlots || []);
     } catch (e) {
       console.error('Failed to fetch bookings', e);
@@ -200,13 +216,13 @@ export default function ClusterBookingPage() {
   };
 
   const activeClusterBooking = selectedCluster ? bookings[selectedCluster] : null;
-  const currentSlotLabel = TIME_SLOTS.find(s => s.start === selectedSlot)?.label;
+  const currentSlotLabel = selectedSlot ? TIME_SLOT_LABELS[selectedSlot] : '';
   const currentDateLabel = DATES.find(d => d.value === selectedDate)?.label;
   const currentDayLabel = DATES.find(d => d.value === selectedDate)?.day;
 
   // Calculate booked slots count
   const bookedCount = Object.values(bookings).filter(v => v !== null).length;
-  const totalSlotsCount = DATES.length * TIME_SLOTS.length;
+  const totalSlotsCount = DATES.reduce((acc, d) => acc + getTimeSlotsForDate(d.value).length, 0);
   const freeSlotsCount = totalSlotsCount - bookedCount;
 
   return (
@@ -228,7 +244,7 @@ export default function ClusterBookingPage() {
 
         <div className="speech-bubble" style={{ display: 'inline-block', marginTop: '14px' }}>
           <p style={{ fontFamily: 'var(--font-comic)', fontSize: '16px', lineHeight: '1.4', letterSpacing: '0.5px' }}>
-            Book one 30-min meeting slot for your Cluster! Only 1 slot per Cluster allowed.
+            Book one 1-hour meeting slot for your Cluster! Only 1 slot per Cluster allowed.
           </p>
         </div>
       </div>
@@ -288,7 +304,7 @@ export default function ClusterBookingPage() {
             <option value="">-- SELECT YOUR CLUSTER (A - L) --</option>
             {CLUSTERS.map((c) => (
               <option key={c} value={c}>
-                Cluster {c} {bookings[c] ? `(Booked: ${DATES.find(d => d.value === bookings[c]?.date)?.label} @ ${bookings[c]?.timeSlot})` : '(Not Booked)'}
+                Cluster {c} {bookings[c] ? `(Booked: ${DATES.find(d => d.value === bookings[c]?.date)?.label} @ ${TIME_SLOT_LABELS[bookings[c]?.timeSlot || ''] || bookings[c]?.timeSlot})` : '(Not Booked)'}
               </option>
             ))}
           </select>
@@ -312,7 +328,7 @@ export default function ClusterBookingPage() {
                   {DATES.find((d) => d.value === activeClusterBooking.date)?.label} (
                   {DATES.find((d) => d.value === activeClusterBooking.date)?.day})
                 </strong>{' '}
-                at <strong>{TIME_SLOTS.find((s) => s.start === activeClusterBooking.timeSlot)?.label}</strong>.
+                at <strong>{TIME_SLOT_LABELS[activeClusterBooking.timeSlot] || activeClusterBooking.timeSlot}</strong>.
                 Selecting a new slot will automatically reschedule it.
               </span>
             ) : (
@@ -392,7 +408,7 @@ export default function ClusterBookingPage() {
           position: 'relative',
           zIndex: 1,
         }}>
-          {TIME_SLOTS.map((slot, i) => {
+          {getTimeSlotsForDate(selectedDate).map((slot, i) => {
             const bookedCluster = getBookingForSlot(selectedDate, slot.start);
             const isBooked = bookedCluster !== null;
             const isMine = isBooked && bookedCluster === selectedCluster;
@@ -487,7 +503,7 @@ export default function ClusterBookingPage() {
                       {booking ? DATES.find(d => d.value === booking.date)?.label : '-'}
                     </td>
                     <td style={{ padding: '8px 10px', borderRight: '1px solid #eee' }}>
-                      {booking ? TIME_SLOTS.find(s => s.start === booking.timeSlot)?.label : '-'}
+                      {booking ? (TIME_SLOT_LABELS[booking.timeSlot] || booking.timeSlot) : '-'}
                     </td>
                     <td style={{ padding: '8px 10px' }}>
                       {booking ? (
@@ -514,7 +530,7 @@ export default function ClusterBookingPage() {
         color: 'var(--text-secondary)',
         letterSpacing: '0.5px',
       }}>
-        ★ Monday 1 June &amp; Tuesday 2 June ★ 11:00 AM to 5:00 PM ★
+        ★ Monday 1 June – Wednesday 3 June ★ 11:00 AM to 5:00 PM (Wed: 11:00 AM to 2:00 PM) ★
       </div>
 
       {/* ========== CONFIRMATION MODAL ========== */}
@@ -582,7 +598,7 @@ export default function ClusterBookingPage() {
                     <div style={{ color: '#b71c1c', marginTop: '10px', fontWeight: 'bold' }}>
                       ⚠️ NOTE: Your existing booking for Cluster {selectedCluster} on{' '}
                       {DATES.find(d => d.value === activeClusterBooking.date)?.label} at{' '}
-                      {TIME_SLOTS.find(s => s.start === activeClusterBooking.timeSlot)?.label} will be released!
+                      {TIME_SLOT_LABELS[activeClusterBooking.timeSlot] || activeClusterBooking.timeSlot} will be released!
                     </div>
                   )}
                 </div>
