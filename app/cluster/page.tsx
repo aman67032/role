@@ -38,13 +38,12 @@ const SLOT_COLORS = [
   '#FFE082', '#81D4FA',
 ];
 
-const LOCAL_STORAGE_KEY = 'ep_cluster_bookings';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function ClusterBookingPage() {
   const [selectedCluster, setSelectedCluster] = useState<ClusterType | ''>('');
   const [selectedDate, setSelectedDate] = useState<string>(DATES[0].value);
   const [bookings, setBookings] = useState<BookingsMap>(() => {
-    // Initial loading is handled in useEffect to avoid server-side render mismatch
     const emptyBookings: BookingsMap = {} as BookingsMap;
     CLUSTERS.forEach((c) => {
       emptyBookings[c] = null;
@@ -52,31 +51,82 @@ export default function ClusterBookingPage() {
     return emptyBookings;
   });
 
+  const [allSlots, setAllSlots] = useState<{ timeSlot: string; slotIndex: number }[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState('');
 
-  // Load from LocalStorage on mount
-  useEffect(() => {
+  // Fetch all bookings for all cluster dates in parallel
+  const fetchAllBookings = useCallback(async () => {
     try {
-      const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) {
-        setBookings(JSON.parse(stored));
+      setFetching(true);
+      setError('');
+      
+      const [res1, res2] = await Promise.all([
+        fetch(`${API_URL}/api/slots?date=2026-06-01&category=clusters`),
+        fetch(`${API_URL}/api/slots?date=2026-06-10&category=clusters`)
+      ]);
+      
+      if (!res1.ok || !res2.ok) {
+        throw new Error('API request failed');
       }
-    } catch (e) {
-      console.error('Failed to load bookings', e);
-    }
-  }, []);
 
-  // Save to LocalStorage on update
-  const saveBookings = (newBookings: BookingsMap) => {
-    setBookings(newBookings);
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newBookings));
+      const data1 = await res1.json();
+      const data2 = await res2.json();
+      
+      const allBooked = [
+        ...(data1.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-01' })),
+        ...(data2.bookedSlots || []).map((b: any) => ({ ...b, date: '2026-06-10' }))
+      ];
+      
+      const newBookingsMap = {} as BookingsMap;
+      CLUSTERS.forEach(c => {
+        newBookingsMap[c] = null;
+      });
+      
+      allBooked.forEach((booking: any) => {
+        if (booking.name) {
+          const clusterId = booking.name.replace('Cluster ', '') as ClusterType;
+          if (CLUSTERS.includes(clusterId)) {
+            newBookingsMap[clusterId] = {
+              date: booking.date,
+              timeSlot: booking.timeSlot
+            };
+          }
+        }
+      });
+      
+      setBookings(newBookingsMap);
+      
+      // Update local slots array for the currently selected date tab
+      const currentData = selectedDate === '2026-06-01' ? data1 : data2;
+      setAllSlots(currentData.allSlots || []);
     } catch (e) {
-      console.error('Failed to save bookings', e);
+      console.error('Failed to fetch bookings', e);
+      setError('Connection to backend API failed. Please ensure the server is running.');
+    } finally {
+      setFetching(false);
     }
-  };
+  }, [selectedDate]);
+
+  // Initial and reactive fetching
+  useEffect(() => {
+    fetchAllBookings();
+  }, [fetchAllBookings]);
+
+  // Set up polling (every 15 seconds)
+  useEffect(() => {
+    const interval = setInterval(fetchAllBookings, 15000);
+    const handleFocus = () => fetchAllBookings();
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchAllBookings]);
 
   // Get booked slot for a given date and timeSlot
   const getBookingForSlot = useCallback((date: string, timeSlot: string): ClusterType | null => {
@@ -94,86 +144,59 @@ export default function ClusterBookingPage() {
     }
 
     const bookingCluster = getBookingForSlot(selectedDate, timeSlot);
-    
-    // If slot is booked by someone else, do nothing
     if (bookingCluster && bookingCluster !== selectedCluster) {
-      return;
+      return; // disabled / booked by someone else
     }
 
     setSelectedSlot(timeSlot);
     setShowModal(true);
     setIsSuccess(false);
+    setError('');
   };
 
-  // Confirm booking
-  const confirmBooking = () => {
+  // Confirm booking to backend
+  const confirmBooking = async () => {
     if (!selectedCluster || !selectedSlot) return;
 
-    const newBookings = { ...bookings };
-    
-    // Assign the new booking
-    newBookings[selectedCluster] = {
-      date: selectedDate,
-      timeSlot: selectedSlot,
-    };
+    setLoading(true);
+    setError('');
 
-    saveBookings(newBookings);
-    setIsSuccess(true);
-
-    setTimeout(() => {
-      setShowModal(false);
-      setSelectedSlot(null);
-      setIsSuccess(false);
-    }, 1500);
-  };
-
-  // Reset all bookings
-  const handleResetAll = () => {
-    if (window.confirm('Are you sure you want to reset all bookings?')) {
-      const emptyBookings: BookingsMap = {} as BookingsMap;
-      CLUSTERS.forEach((c) => {
-        emptyBookings[c] = null;
+    try {
+      const res = await fetch(`${API_URL}/api/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: selectedDate,
+          timeSlot: selectedSlot,
+          slotIndex: 0,
+          category: 'clusters',
+          name: `Cluster ${selectedCluster}`,
+          phone: 'N/A',
+          jkluId: 'N/A',
+          rollNumber: 'N/A',
+          formNumber: 'N/A'
+        })
       });
-      saveBookings(emptyBookings);
-      setSelectedSlot(null);
-      setSelectedCluster('');
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to book slot');
+      }
+
+      setIsSuccess(true);
+      fetchAllBookings(); // update state from backend
+
+      setTimeout(() => {
+        setShowModal(false);
+        setSelectedSlot(null);
+        setIsSuccess(false);
+      }, 2000);
+    } catch (e: any) {
+      setError(e.message || 'Network error occurred. Try again.');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  // Load demo bookings for quick testing
-  const handleLoadDemo = () => {
-    const demoBookings: BookingsMap = { ...bookings };
-    const dates = DATES.map(d => d.value);
-    const slots = TIME_SLOTS.map(s => s.start);
-
-    // Randomly assign 6 clusters to random non-overlapping slots
-    const availableSlots: { date: string; slot: string }[] = [];
-    dates.forEach(d => {
-      slots.forEach(s => {
-        availableSlots.push({ date: d, slot: s });
-      });
-    });
-
-    // Shuffle slots
-    for (let i = availableSlots.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [availableSlots[i], availableSlots[j]] = [availableSlots[j], availableSlots[i]];
-    }
-
-    // Reset all first
-    CLUSTERS.forEach(c => {
-      demoBookings[c] = null;
-    });
-
-    // Assign first 6 clusters to unique random slots
-    CLUSTERS.slice(0, 7).forEach((c, idx) => {
-      demoBookings[c] = {
-        date: availableSlots[idx].date,
-        timeSlot: availableSlots[idx].slot
-      };
-    });
-
-    saveBookings(demoBookings);
   };
 
   const activeClusterBooking = selectedCluster ? bookings[selectedCluster] : null;
@@ -183,7 +206,8 @@ export default function ClusterBookingPage() {
 
   // Calculate booked slots count
   const bookedCount = Object.values(bookings).filter(v => v !== null).length;
-  const freeSlotsCount = (DATES.length * TIME_SLOTS.length) - bookedCount;
+  const totalSlotsCount = DATES.length * TIME_SLOTS.length;
+  const freeSlotsCount = totalSlotsCount - bookedCount;
 
   return (
     <div style={{ minHeight: '100vh', padding: '16px', maxWidth: '1000px', margin: '0 auto' }}>
@@ -208,6 +232,21 @@ export default function ClusterBookingPage() {
           </p>
         </div>
       </div>
+
+      {error && !showModal && (
+        <div className="pixel-border-sm" style={{
+          background: '#FFCDD2',
+          padding: '12px 18px',
+          marginBottom: '20px',
+          fontFamily: 'var(--font-comic)',
+          fontSize: '15px',
+          color: '#B71C1C',
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          💥 {error}
+        </div>
+      )}
 
       {/* Cluster Select dropdown */}
       <div className="pixel-border-sm" style={{
@@ -253,15 +292,6 @@ export default function ClusterBookingPage() {
               </option>
             ))}
           </select>
-          
-          <button 
-            type="button" 
-            className="comic-btn"
-            style={{ padding: '8px 18px', fontSize: '14px', background: 'var(--accent-orange)' }}
-            onClick={handleLoadDemo}
-          >
-            🎲 DEMO DATA
-          </button>
         </div>
 
         {selectedCluster && (
@@ -318,7 +348,7 @@ export default function ClusterBookingPage() {
           color: '#fff',
           lineHeight: '1.5',
         }}>
-          📅 {freeSlotsCount} / {DATES.length * TIME_SLOTS.length} SLOTS AVAILABLE
+          {fetching ? '⏳ LOADING SLOTS...' : `📅 ${freeSlotsCount} / ${totalSlotsCount} SLOTS AVAILABLE`}
         </div>
       </div>
 
@@ -422,14 +452,6 @@ export default function ClusterBookingPage() {
           <h2 style={{ fontFamily: 'var(--font-comic)', fontSize: '24px', letterSpacing: '1px' }}>
             📊 BOOKING SUMMARY DASHBOARD
           </h2>
-          <button 
-            type="button"
-            className="comic-btn"
-            style={{ padding: '6px 14px', fontSize: '12px', background: '#e57373', color: '#fff' }}
-            onClick={handleResetAll}
-          >
-            💥 RESET ALL
-          </button>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
@@ -497,7 +519,7 @@ export default function ClusterBookingPage() {
 
       {/* ========== CONFIRMATION MODAL ========== */}
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={() => !loading && setShowModal(false)}>
           <div className="modal-content animate-pop" onClick={(e) => e.stopPropagation()}>
             {isSuccess ? (
               <div style={{ textAlign: 'center', padding: '16px' }} className="success-pop">
@@ -532,6 +554,19 @@ export default function ClusterBookingPage() {
                   </h2>
                 </div>
 
+                {error && (
+                  <div className="pixel-border-sm" style={{
+                    background: '#FFCDD2',
+                    padding: '10px 14px',
+                    marginBottom: '14px',
+                    fontFamily: 'var(--font-comic)',
+                    fontSize: '14px',
+                    color: '#B71C1C',
+                  }}>
+                    💥 {error}
+                  </div>
+                )}
+
                 <div style={{
                   fontFamily: 'var(--font-comic)',
                   fontSize: '16px',
@@ -558,6 +593,7 @@ export default function ClusterBookingPage() {
                     className="comic-btn"
                     style={{ background: '#eee', flex: 1 }}
                     onClick={() => setShowModal(false)}
+                    disabled={loading}
                   >
                     ✗ CANCEL
                   </button>
@@ -566,8 +602,9 @@ export default function ClusterBookingPage() {
                     className="comic-btn"
                     style={{ background: 'var(--accent-green)', flex: 1 }}
                     onClick={confirmBooking}
+                    disabled={loading}
                   >
-                    ⚡ CONFIRM
+                    {loading ? '⏳ ...' : '⚡ CONFIRM'}
                   </button>
                 </div>
               </>
