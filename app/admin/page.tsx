@@ -29,7 +29,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [fetchError, setFetchError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers' | 'leaders' | 'clusters'>('oh-cores');
+  const [viewMode, setViewMode] = useState<'oh-cores' | 'volunteers' | 'leaders' | 'clusters' | 'committees'>('oh-cores');
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -240,6 +240,10 @@ export default function AdminPage() {
           <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>CLUSTERS</div>
           <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-green)' }}>{bookings.filter((b: Booking) => b.category === 'clusters').length}</div>
         </div>
+        <div style={{ flex: 1, minWidth: '150px', padding: '20px', background: 'var(--bg-secondary)', border: '4px solid var(--border-color)', boxShadow: '6px 6px 0 var(--shadow-color)', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '800', opacity: 0.7, marginBottom: '4px' }}>COMMITTEES</div>
+          <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--accent-pink)' }}>{bookings.filter((b: Booking) => b.category === 'committees').length}</div>
+        </div>
       </div>
 
       {fetchError && (
@@ -310,6 +314,21 @@ export default function AdminPage() {
         >
           ⚡ CLUSTERS
         </button>
+        <button
+          onClick={() => setViewMode('committees')}
+          className={`comic-btn ${viewMode === 'committees' ? 'active' : ''}`}
+          style={{ 
+            flex: 1, 
+            minWidth: '150px',
+            padding: '16px', 
+            background: viewMode === 'committees' ? 'var(--accent-pink)' : '#eee',
+            color: viewMode === 'committees' ? '#fff' : '#333',
+            fontSize: '1.1rem',
+            fontWeight: '900'
+          }}
+        >
+          🏢 COMMITTEES
+        </button>
       </div>
 
       {/* Date Tabs (For both modes) */}
@@ -352,9 +371,12 @@ export default function AdminPage() {
                     </span>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <span style={{ 
-                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : b.category === 'leaders' ? 'var(--accent-orange)' : b.category === 'clusters' ? 'var(--accent-green)' : 'var(--accent-blue)', 
+                        background: b.category === 'volunteers' ? 'var(--accent-pink)' : 
+                                    b.category === 'leaders' ? 'var(--accent-orange)' : 
+                                    b.category === 'clusters' ? 'var(--accent-green)' : 
+                                    b.category === 'committees' ? 'var(--accent-yellow)' : 'var(--accent-blue)', 
                         padding: '4px 8px', 
-                        color: b.category === 'clusters' ? '#111' : '#fff', 
+                        color: (b.category === 'clusters' || b.category === 'committees') ? '#111' : '#fff', 
                         fontSize: '10px', 
                         fontWeight: '900', 
                         borderRadius: '2px',
@@ -376,7 +398,7 @@ export default function AdminPage() {
                       <div style={{ fontSize: '22px', fontWeight: '900', color: 'var(--accent-pink)', marginTop: '4px' }}>{b.name}</div>
                     </div>
                     
-                    {b.category !== 'leaders' && (
+                    {b.category !== 'leaders' && b.category !== 'clusters' && b.category !== 'committees' && (
                       <div style={{ borderBottom: '2px dashed #ccc', paddingBottom: '12px' }}>
                         <div style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.5px' }}>COMMLINK (PHONE)</div>
                         <div style={{ fontSize: '18px', fontWeight: '800', marginTop: '4px' }}>📞 {b.phone}</div>
@@ -391,20 +413,22 @@ export default function AdminPage() {
                     )}
                     
                     {/* Identification Block */}
-                    <div style={{ padding: '16px', background: 'var(--bg-secondary)', border: '3px solid var(--border-color)', borderRadius: '4px', position: 'relative' }}>
-                      <div style={{ fontSize: '11px', fontWeight: '800', marginBottom: '8px', opacity: 0.6, letterSpacing: '0.5px' }}>// IDENTIFICATION DB</div>
-                      <div style={{ fontSize: '15px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
-                        <span style={{ color: '#666', fontWeight: '700' }}>ID:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.jkluId}</strong>
-                      </div>
-                      <div style={{ fontSize: '15px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
-                        <span style={{ color: '#666', fontWeight: '700' }}>ROLL:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.rollNumber}</strong>
-                      </div>
-                      {b.category !== 'leaders' && (
-                        <div style={{ fontSize: '15px', margin: '8px 0' }}>
-                          <span style={{ color: '#666', fontWeight: '700' }}>FORM REF:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.formNumber}</strong>
+                    {b.category !== 'clusters' && b.category !== 'committees' && (
+                      <div style={{ padding: '16px', background: 'var(--bg-secondary)', border: '3px solid var(--border-color)', borderRadius: '4px', position: 'relative' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '800', marginBottom: '8px', opacity: 0.6, letterSpacing: '0.5px' }}>// IDENTIFICATION DB</div>
+                        <div style={{ fontSize: '15px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
+                          <span style={{ color: '#666', fontWeight: '700' }}>ID:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.jkluId}</strong>
                         </div>
-                      )}
-                    </div>
+                        <div style={{ fontSize: '15px', margin: '8px 0', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
+                          <span style={{ color: '#666', fontWeight: '700' }}>ROLL:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.rollNumber}</strong>
+                        </div>
+                        {b.category !== 'leaders' && (
+                          <div style={{ fontSize: '15px', margin: '8px 0' }}>
+                            <span style={{ color: '#666', fontWeight: '700' }}>FORM REF:</span> <strong style={{ marginLeft: '6px', fontWeight: '800' }}>{b.formNumber}</strong>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                   </div>
                 </div>
